@@ -1,0 +1,8 @@
+venv/
+**pycache**/
+*.pyc
+.env
+.idea/
+.DS_Store
+soil_report.pdf
+final_soil_report.pdf

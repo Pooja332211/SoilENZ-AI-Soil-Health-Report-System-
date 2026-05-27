@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+```
+<meta charset="UTF-8">
+
+<title>
+    Soil Intelligence Report
+</title>
+
+<style>
+
+    body {
+        font-family: Arial, sans-serif;
+        padding: 30px;
+        color: #1f2937;
+        background: #f9fafb;
+    }
+
+    h1 {
+        color: #166534;
+    }
+
+    h2 {
+        color: #15803d;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #d1d5db;
+    }
+
+    .score {
+        font-size: 50px;
+        font-weight: bold;
+        color: #166534;
+    }
+
+    .status {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    table th {
+        background: #166534;
+        color: white;
+        padding: 12px;
+    }
+
+    table td {
+        border: 1px solid #d1d5db;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .green {
+        color: green;
+        font-weight: bold;
+    }
+
+    .orange {
+        color: orange;
+        font-weight: bold;
+    }
+
+    .red {
+        color: red;
+        font-weight: bold;
+    }
+
+    ul li {
+        margin-bottom: 10px;
+    }
+
+</style>
+```
+
+</head>
+
+<body>
+
+```
+<div class="header">
+
+    <h1>
+        Agro Intelligence Platform
+    </h1>
+
+    <h2>
+        Soil Health Intelligence Report
+    </h2>
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        Farmer Information
+    </h2>
+
+    <p>
+        <strong>Name:</strong>
+        {{ report.farmer.name }}
+    </p>
+
+    <p>
+        <strong>Village:</strong>
+        {{ report.farmer.village }}
+    </p>
+
+    <p>
+        <strong>Crop:</strong>
+        {{ report.farmer.crop }}
+    </p>
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        Soil Health Score
+    </h2>
+
+    <div class="score">
+        {{ report.soil_health_score }}/100
+    </div>
+
+    <div class="status">
+        {{ report.health_status }}
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        Nutrient Analysis
+    </h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Parameter</th>
+
+                <th>Value</th>
+
+                <th>Status</th>
+
+                <th>Score</th>
+
+                <th>Recommendation</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for key, value in report.parameters.items() %}
+
+            <tr>
+
+                <td>
+                    {{ key }}
+                </td>
+
+                <td>
+                    {{ value.value }}
+                </td>
+
+                <td class="{{ value.color }}">
+                    {{ value.status }}
+                </td>
+
+                <td>
+                    {{ value.score }}
+                </td>
+
+                <td>
+                    {{ value.recommendation }}
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        Soil Recommendations
+    </h2>
+
+    <ul>
+
+    {% for item in report.summary %}
+
+        <li>
+            {{ item }}
+        </li>
+
+    {% endfor %}
+
+    </ul>
+
+</div>
+```
+
+</body>
+
+</html>

@@ -1,0 +1,255 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================
+GLOBAL
+========================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+
+  background: #eef2ef;
+
+  font-family: Inter, sans-serif;
+
+  color: #111827;
+
+  overflow-x: hidden;
+
+  zoom: 0.85;
+}
+
+/* =========================================
+ROOT
+========================================= */
+
+#root {
+  min-height: 100vh;
+}
+
+/* =========================================
+SCROLLBAR
+========================================= */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #edf2ef;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #14532d;
+  border-radius: 20px;
+}
+
+/* =========================================
+BUTTON
+========================================= */
+
+button {
+
+  transition: all 0.3s ease;
+
+  cursor: pointer;
+}
+
+/* =========================================
+IMAGES
+========================================= */
+
+img {
+
+  max-width: 100%;
+
+  display: block;
+}
+
+/* =========================================
+TABLE
+========================================= */
+
+table {
+
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+/* =========================================
+REPORT PAGE
+========================================= */
+
+.report-page {
+
+  width: 210mm;
+
+  min-height: 297mm;
+
+  margin: 0 auto;
+
+  background: white;
+
+  padding: 12mm;
+
+  border-radius: 20px;
+
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+
+  overflow: hidden;
+
+  position: relative;
+}
+
+/* =========================================
+FONT SIZE CONTROL
+========================================= */
+
+.report-page h1 {
+
+  font-size: 32px !important;
+
+  line-height: 38px !important;
+}
+
+.report-page h2 {
+
+  font-size: 22px !important;
+}
+
+.report-page h3 {
+
+  font-size: 16px !important;
+}
+
+.report-page p,
+.report-page span,
+.report-page li,
+.report-page td,
+.report-page th {
+
+  font-size: 12px !important;
+
+  line-height: 18px !important;
+}
+
+/* =========================================
+TABLE STYLING
+========================================= */
+
+table th {
+
+  padding: 10px;
+
+  font-size: 12px !important;
+}
+
+table td {
+
+  padding: 8px;
+
+  font-size: 11px !important;
+}
+
+/* =========================================
+CARDS
+========================================= */
+
+.card-hover {
+
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+
+  transform: translateY(-4px);
+
+  box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+}
+
+/* =========================================
+ANIMATION
+========================================= */
+
+.fade-in {
+
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+
+  from {
+
+    opacity: 0;
+
+    transform: translateY(10px);
+  }
+
+  to {
+
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+PAGE BREAK
+========================================= */
+
+.page-break {
+
+  page-break-after: always;
+
+  break-after: page;
+
+  margin-bottom: 30px;
+}
+
+/* =========================================
+PDF / PRINT FIX
+========================================= */
+
+@media print {
+
+  body {
+
+    background: white;
+
+    zoom: 1;
+  }
+
+  .report-page {
+
+    width: 210mm;
+
+    min-height: 297mm;
+
+    padding: 10mm;
+
+    margin: 0;
+
+    border-radius: 0;
+
+    box-shadow: none;
+
+    overflow: hidden;
+  }
+
+  button {
+
+    display: none !important;
+  }
+
+  .page-break {
+
+    page-break-after: always;
+  }
+}
