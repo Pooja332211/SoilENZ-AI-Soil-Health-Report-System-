@@ -1,86 +1,126 @@
-from typing import List
-from uuid import UUID
-
 from fastapi import APIRouter
-from fastapi import Depends
-from fastapi import HTTPException
+from fastapi import UploadFile
+from fastapi import File
 
-from sqlalchemy.orm import Session
+from app.services.ocr_service import extract_receipt_data
+from app.services.crop_recommendation_service import CropRecommendationService
+from app.services.action_plan_service import ActionPlanService
+from app.services.carbon_credit_service import CarbonCreditService
+from app.services.soil_health_score import calculate_soil_health_score
 
-from app.core.database import get_db
-
-from app.models.soil_test import SoilTest
-from app.models.farmer import Farmer
-
-from app.schemas.soil_schema import (
-    SoilTestCreate,
-    SoilTestResponse
-)
+router = APIRouter()
 
 
-router = APIRouter(
-    prefix="/soil-tests",
-    tags=["Soil Tests"]
-)
+def safe_float(value):
+    try:
+        return float(value)
+    except:
+        return 0.0
 
 
-@router.post(
-    "/",
-    response_model=SoilTestResponse
-)
-def create_soil_test(
-    soil_test: SoilTestCreate,
-    db: Session = Depends(get_db)
-):
-    farmer = db.query(Farmer).filter(
-        Farmer.id == soil_test.farmer_id
-    ).first()
+@router.post("/api/upload-receipt")
+async def upload_receipt(file: UploadFile = File(...)):
 
-    if not farmer:
-        raise HTTPException(
-            status_code=404,
-            detail="Farmer not found"
-        )
+    contents = await file.read()
 
-    db_soil_test = SoilTest(
-        **soil_test.model_dump()
+    extracted_data = extract_receipt_data(contents)
+
+    # =========================================
+    # SOIL HEALTH SCORE
+    # =========================================
+
+    class SoilTest:
+        pass
+
+    soil_test = SoilTest()
+
+    soil_test.ph = safe_float(
+        extracted_data.get("ph")
     )
 
-    db.add(db_soil_test)
+    soil_test.ec = safe_float(
+        extracted_data.get("ec")
+    )
 
-    db.commit()
+    soil_test.organic_carbon = safe_float(
+        extracted_data.get("organic_carbon")
+    )
 
-    db.refresh(db_soil_test)
+    soil_test.nitrogen = safe_float(
+        extracted_data.get("nitrogen")
+    )
 
-    return db_soil_test
+    soil_test.phosphorus = safe_float(
+        extracted_data.get("phosphorus")
+    )
 
+    soil_test.potassium = safe_float(
+        extracted_data.get("potassium")
+    )
 
-@router.get(
-    "/",
-    response_model=List[SoilTestResponse]
-)
-def get_soil_tests(
-    db: Session = Depends(get_db)
-):
-    return db.query(SoilTest).all()
+    soil_test.zinc = safe_float(
+        extracted_data.get("zinc")
+    )
 
+    soil_test.boron = safe_float(
+        extracted_data.get("boron")
+    )
 
-@router.get(
-    "/{soil_test_id}",
-    response_model=SoilTestResponse
-)
-def get_soil_test(
-    soil_test_id: UUID,
-    db: Session = Depends(get_db)
-):
-    soil_test = db.query(SoilTest).filter(
-        SoilTest.id == soil_test_id
-    ).first()
+    soil_test.iron = safe_float(
+        extracted_data.get("iron")
+    )
 
-    if not soil_test:
-        raise HTTPException(
-            status_code=404,
-            detail="Soil test not found"
-        )
+    soil_health = calculate_soil_health_score(
+        soil_test
+    )
 
-    return soil_test
+    # =========================================
+    # CROP RECOMMENDATION
+    # =========================================
+
+    crop_recommendations = (
+        CropRecommendationService
+        .recommend_crops(extracted_data)
+    )
+
+    # =========================================
+    # ACTION PLAN
+    # =========================================
+
+    action_plan = (
+        ActionPlanService
+        .generate_plan(extracted_data)
+    )
+
+    # =========================================
+    # CARBON DATA
+    # =========================================
+
+    carbon_data = (
+        CarbonCreditService
+        .calculate_carbon(extracted_data)
+    )
+
+    print("\n=========== EXTRACTED DATA ===========\n")
+    print(extracted_data)
+
+    print("\n=========== SOIL HEALTH ===========\n")
+    print(soil_health)
+
+    print("\n=========== CROP RECOMMENDATIONS ===========\n")
+    print(crop_recommendations)
+
+    print("\n=========== ACTION PLAN ===========\n")
+    print(action_plan)
+
+    print("\n=========== CARBON DATA ===========\n")
+    print(carbon_data)
+
+    return {
+        "success": True,
+        "data": extracted_data,
+        "soil_health": soil_health,
+        "crop_recommendations": crop_recommendations,
+        "action_plan": action_plan,
+        "carbon_data": carbon_data
+    }

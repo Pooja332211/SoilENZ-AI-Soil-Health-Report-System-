@@ -1,26 +1,49 @@
 import axios from "axios";
 
+// ========================================
+// AXIOS INSTANCE
+// ========================================
+
 const API = axios.create({
-
   baseURL: "http://127.0.0.1:8000",
-
+  headers: {
+    "Content-Type": "multipart/form-data",
+  },
 });
 
-export const generateSoilReport = async (formData) => {
+// ========================================
+// GENERATE SOIL REPORT
+// ========================================
 
-  const response = await API.post(
+export const generateSoilReport = async (file) => {
+  try {
+    const formData = new FormData();
 
-    "/generate-report",
+    formData.append("file", file);
 
-    formData,
+    console.log("UPLOADING FILE...");
 
-    {
-      headers: {
-        "Content-Type":
-          "multipart/form-data",
-      },
-    }
-  );
+    const response = await API.post(
+      "/api/upload-receipt",
+      formData
+    );
 
-  return response.data;
+    console.log(
+      "========== API RESPONSE =========="
+    );
+
+    console.log(response.data);
+
+    // IMPORTANT FIX
+    // Return full backend response
+    return response.data;
+
+  } catch (error) {
+    console.error(
+      "API ERROR:",
+      error
+    );
+
+    throw error;
+  }
 };

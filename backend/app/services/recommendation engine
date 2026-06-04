@@ -1,0 +1,422 @@
+"""
+Recommendation Engine - Dynamic fertilizer, amendment, and practice recommendations.
+All recommendations derived from actual soil deficiency analysis.
+"""
+
+from typing import Optional
+from .analytics_service import OPTIMAL_RANGES, DEFICIENCY_THRESHOLDS, _score_parameter
+
+
+# ─── Recommendation Rules ────────────────────────────────────────────────────
+
+# Each rule: (condition_fn, priority, category, recommendation, dose_template, rationale)
+# condition_fn receives soil dict and returns True if rule applies
+
+FERTILIZER_RULES = [
+    # ── pH corrections ──
+    {
+        "id": "high_ph_gypsum",
+        "condition": lambda s: s.get("pH") is not None and s["pH"] > 8.0,
+        "priority": 1,
+        "category": "Soil Amendment",
+        "action": "Apply Gypsum (Calcium Sulphate)",
+        "dose": lambda s: f"{_gypsum_dose(s['pH'])} kg/acre",
+        "timing": "Pre-sowing, incorporate well",
+        "rationale": lambda s: f"Soil pH {s['pH']:.1f} is highly alkaline. Gypsum reduces pH and improves Ca/S availability.",
+        "benefit": "pH reduction by 0.3-0.5 units, improved Ca and S availability",
+    },
+    {
+        "id": "low_ph_lime",
+        "condition": lambda s: s.get("pH") is not None and s["pH"] < 5.5,
+        "priority": 1,
+        "category": "Soil Amendment",
+        "action": "Apply Agricultural Lime (CaCO₃)",
+        "dose": lambda s: f"{_lime_dose(s['pH'])} kg/acre",
+        "timing": "1-2 months before sowing",
+        "rationale": lambda s: f"Soil pH {s['pH']:.1f} is highly acidic, limiting nutrient availability.",
+        "benefit": "pH increase, improved P and Mg availability, reduced Al/Mn toxicity",
+    },
+    {
+        "id": "moderate_high_ph",
+        "condition": lambda s: s.get("pH") is not None and 7.5 < s["pH"] <= 8.0,
+        "priority": 3,
+        "category": "Soil Amendment",
+        "action": "Apply Sulphur (Elemental S)",
+        "dose": lambda s: "10-15 kg/acre",
+        "timing": "Pre-sowing",
+        "rationale": lambda s: f"pH {s['pH']:.1f} slightly alkaline. Elemental sulphur gradually acidifies.",
+        "benefit": "Gradual pH reduction, improved micronutrient solubility",
+    },
+
+    # ── Nitrogen ──
+    {
+        "id": "very_low_N",
+        "condition": lambda s: s.get("N") is not None and s["N"] < 140,
+        "priority": 1,
+        "category": "Fertilizer - Macronutrient",
+        "action": "Apply Urea (46% N)",
+        "dose": lambda s: f"{_N_dose(s['N'])} kg/acre",
+        "timing": "Split: 50% basal + 25% at tillering + 25% at flowering",
+        "rationale": lambda s: f"N = {s['N']:.0f} kg/ha is critically low (threshold: 140 kg/ha).",
+        "benefit": "Improved vegetative growth, chlorophyll synthesis, protein content",
+    },
+    {
+        "id": "medium_low_N",
+        "condition": lambda s: s.get("N") is not None and 140 <= s["N"] < 280,
+        "priority": 2,
+        "category": "Fertilizer - Macronutrient",
+        "action": "Apply DAP (18:46:0) or Urea",
+        "dose": lambda s: f"{_N_dose(s['N']) * 0.7:.0f} kg/acre urea or 25-30 kg/acre DAP",
+        "timing": "Basal application before sowing",
+        "rationale": lambda s: f"N = {s['N']:.0f} kg/ha is medium-low.",
+        "benefit": "Adequate nitrogen for healthy crop growth",
+    },
+
+    # ── Phosphorus ──
+    {
+        "id": "very_low_P",
+        "condition": lambda s: s.get("P") is not None and s["P"] < 11,
+        "priority": 1,
+        "category": "Fertilizer - Macronutrient",
+        "action": "Apply Single Super Phosphate (SSP) or DAP",
+        "dose": lambda s: f"{_P_dose(s['P'])} kg/acre SSP",
+        "timing": "Basal application, incorporate in soil",
+        "rationale": lambda s: f"P = {s['P']:.1f} kg/ha critically low (threshold: 11 kg/ha). Root development affected.",
+        "benefit": "Improved root development, energy transfer, flowering and fruiting",
+    },
+    {
+        "id": "low_P",
+        "condition": lambda s: s.get("P") is not None and 11 <= s["P"] < 22,
+        "priority": 2,
+        "category": "Fertilizer - Macronutrient",
+        "action": "Apply DAP (18:46:0) or Rock Phosphate",
+        "dose": lambda s: "20-25 kg/acre DAP",
+        "timing": "Basal application",
+        "rationale": lambda s: f"P = {s['P']:.1f} kg/ha is low.",
+        "benefit": "Enhanced root growth and flower set",
+    },
+
+    # ── Potassium ──
+    {
+        "id": "very_low_K",
+        "condition": lambda s: s.get("K") is not None and s["K"] < 110,
+        "priority": 1,
+        "category": "Fertilizer - Macronutrient",
+        "action": "Apply Muriate of Potash (MOP) or SOP",
+        "dose": lambda s: f"{_K_dose(s['K'])} kg/acre MOP",
+        "timing": "Split: 50% basal + 50% at 30-40 days",
+        "rationale": lambda s: f"K = {s['K']:.0f} kg/ha critically low. Stress resistance and quality affected.",
+        "benefit": "Improved drought tolerance, disease resistance, grain quality",
+    },
+    {
+        "id": "low_K",
+        "condition": lambda s: s.get("K") is not None and 110 <= s["K"] < 280,
+        "priority": 2,
+        "category": "Fertilizer - Macronutrient",
+        "action": "Apply MOP (Muriate of Potash)",
+        "dose": lambda s: "15-20 kg/acre",
+        "timing": "Basal + top dressing",
+        "rationale": lambda s: f"K = {s['K']:.0f} kg/ha is medium-low.",
+        "benefit": "Enhanced stress tolerance and crop quality",
+    },
+
+    # ── Organic Carbon ──
+    {
+        "id": "very_low_OC",
+        "condition": lambda s: s.get("OC") is not None and s["OC"] < 0.5,
+        "priority": 1,
+        "category": "Organic Matter",
+        "action": "Apply FYM (Farm Yard Manure) + Vermicompost",
+        "dose": lambda s: "2-3 tonnes/acre FYM + 200-300 kg/acre vermicompost",
+        "timing": "3-4 weeks before sowing, deep incorporation",
+        "rationale": lambda s: f"OC = {s['OC']:.2f}% is critically low. Soil biology and structure severely compromised.",
+        "benefit": "Improved soil biology, water retention, CEC, and long-term fertility",
+    },
+    {
+        "id": "low_OC",
+        "condition": lambda s: s.get("OC") is not None and 0.5 <= s["OC"] < 0.75,
+        "priority": 2,
+        "category": "Organic Matter",
+        "action": "Apply FYM or Compost",
+        "dose": lambda s: "1-1.5 tonnes/acre FYM or crop residue incorporation",
+        "timing": "Pre-sowing",
+        "rationale": lambda s: f"OC = {s['OC']:.2f}% is low. Aim for >0.75%.",
+        "benefit": "Gradual improvement in soil organic matter and microbial activity",
+    },
+
+    # ── High EC (salinity) ──
+    {
+        "id": "high_EC",
+        "condition": lambda s: s.get("EC") is not None and s["EC"] > 1.2,
+        "priority": 1,
+        "category": "Soil Amendment",
+        "action": "Leaching + Gypsum application",
+        "dose": lambda s: f"Apply {_gypsum_dose_ec(s['EC'])} kg/acre gypsum + irrigation leaching",
+        "timing": "Before sowing, apply 2-3 heavy irrigations to leach salts",
+        "rationale": lambda s: f"EC = {s['EC']:.2f} dS/m indicates salinity stress. Crop yield reduced.",
+        "benefit": "Salt leaching, improved germination and crop stand",
+    },
+
+    # ── Zinc ──
+    {
+        "id": "low_Zn",
+        "condition": lambda s: s.get("Zn") is not None and s["Zn"] < 0.8,
+        "priority": 2,
+        "category": "Micronutrient",
+        "action": "Apply Zinc Sulphate (ZnSO₄)",
+        "dose": lambda s: f"{_Zn_dose(s['Zn'])} kg/acre",
+        "timing": "Basal application or foliar spray (0.5% ZnSO₄) at 25-30 DAS",
+        "rationale": lambda s: f"Zn = {s['Zn']:.2f} ppm is deficient (threshold: 0.8 ppm). Affects enzyme activity.",
+        "benefit": "Improved enzyme activity, grain filling, and disease resistance",
+    },
+
+    # ── Iron ──
+    {
+        "id": "low_Fe",
+        "condition": lambda s: s.get("Fe") is not None and s["Fe"] < 4.5,
+        "priority": 2,
+        "category": "Micronutrient",
+        "action": "Apply FeSO₄ (Ferrous Sulphate)",
+        "dose": lambda s: "5-6 kg/acre soil application or 0.5% foliar spray",
+        "timing": "Soil: pre-sowing. Foliar: at first sign of yellowing",
+        "rationale": lambda s: f"Fe = {s['Fe']:.2f} ppm is deficient. Chlorosis likely.",
+        "benefit": "Corrects iron chlorosis, improves photosynthesis",
+    },
+
+    # ── Boron ──
+    {
+        "id": "low_B",
+        "condition": lambda s: s.get("B") is not None and s["B"] < 0.5,
+        "priority": 3,
+        "category": "Micronutrient",
+        "action": "Apply Borax or Boric Acid",
+        "dose": lambda s: "1-1.5 kg/acre borax",
+        "timing": "Basal or foliar at flowering",
+        "rationale": lambda s: f"B = {s['B']:.2f} ppm is deficient. Affects cell wall formation and pollen viability.",
+        "benefit": "Improved pollination, fruit set, and seed development",
+    },
+
+    # ── Manganese ──
+    {
+        "id": "low_Mn",
+        "condition": lambda s: s.get("Mn") is not None and s["Mn"] < 2.0,
+        "priority": 3,
+        "category": "Micronutrient",
+        "action": "Apply MnSO₄ (Manganese Sulphate)",
+        "dose": lambda s: "3-4 kg/acre or 0.5% foliar spray",
+        "timing": "Soil: basal. Foliar: at vegetative stage",
+        "rationale": lambda s: f"Mn = {s['Mn']:.2f} ppm is deficient.",
+        "benefit": "Improved photosynthesis and enzyme activity",
+    },
+
+    # ── Copper ──
+    {
+        "id": "low_Cu",
+        "condition": lambda s: s.get("Cu") is not None and s["Cu"] < 0.5,
+        "priority": 3,
+        "category": "Micronutrient",
+        "action": "Apply CuSO₄ (Copper Sulphate)",
+        "dose": lambda s: "2-3 kg/acre or 0.2% foliar spray",
+        "timing": "Basal or foliar",
+        "rationale": lambda s: f"Cu = {s['Cu']:.2f} ppm is deficient.",
+        "benefit": "Improved enzyme function and disease resistance",
+    },
+
+    # ── Sulphur ──
+    {
+        "id": "low_S",
+        "condition": lambda s: s.get("S") is not None and s["S"] < 20,
+        "priority": 2,
+        "category": "Micronutrient",
+        "action": "Apply Ammonium Sulphate or Elemental Sulphur",
+        "dose": lambda s: "8-10 kg/acre elemental sulphur or 20-25 kg/acre ammonium sulphate",
+        "timing": "Basal application",
+        "rationale": lambda s: f"S = {s['S']:.1f} ppm is deficient. Essential for protein synthesis.",
+        "benefit": "Improved protein synthesis, oil quality in oilseeds, brassica crops",
+    },
+
+    # ── Magnesium ──
+    {
+        "id": "low_Mg",
+        "condition": lambda s: s.get("Mg") is not None and s["Mg"] < 120,
+        "priority": 3,
+        "category": "Micronutrient",
+        "action": "Apply Dolomite or MgSO₄",
+        "dose": lambda s: "50-60 kg/acre dolomite or 10-15 kg/acre MgSO₄",
+        "timing": "Pre-sowing or foliar at vegetative stage",
+        "rationale": lambda s: f"Mg = {s['Mg']:.0f} ppm is deficient. Chlorophyll component.",
+        "benefit": "Improved chlorophyll production and enzyme activation",
+    },
+
+    # ── Biofertilizer (always recommended if low OC or low N) ──
+    {
+        "id": "biofertilizer",
+        "condition": lambda s: (s.get("OC", 1) < 0.75 or s.get("N", 300) < 280),
+        "priority": 3,
+        "category": "Biofertilizer",
+        "action": "Apply Rhizobium / PSB / Azospirillum seed treatment",
+        "dose": lambda s: "200g/acre seed treatment + 500g/acre soil drench",
+        "timing": "At sowing",
+        "rationale": lambda s: "Low organic matter / nitrogen - biofertilizers enhance N fixation and P solubilisation.",
+        "benefit": "Enhanced nutrient availability, 10-20% reduction in chemical fertilizer need",
+    },
+]
+
+
+# ─── Dose Calculators ─────────────────────────────────────────────────────────
+
+def _N_dose(n_val: float) -> float:
+    deficit = max(0, 280 - n_val)
+    return round(min(40, deficit * 0.08), 1)
+
+def _P_dose(p_val: float) -> float:
+    deficit = max(0, 22 - p_val)
+    return round(min(50, deficit * 1.2), 1)
+
+def _K_dose(k_val: float) -> float:
+    deficit = max(0, 280 - k_val)
+    return round(min(30, deficit * 0.07), 1)
+
+def _Zn_dose(zn_val: float) -> float:
+    if zn_val < 0.4:
+        return 5.0
+    elif zn_val < 0.6:
+        return 4.0
+    else:
+        return 3.0
+
+def _gypsum_dose(ph: float) -> float:
+    excess = max(0, ph - 7.5)
+    return round(min(200, excess * 60 + 40), 0)
+
+def _gypsum_dose_ec(ec: float) -> float:
+    excess = max(0, ec - 1.2)
+    return round(min(300, excess * 80 + 100), 0)
+
+def _lime_dose(ph: float) -> float:
+    deficit = max(0, 6.0 - ph)
+    return round(min(300, deficit * 120), 0)
+
+
+# ─── Action Plan Builder ──────────────────────────────────────────────────────
+
+def generate_recommendations(soil: dict, crop: Optional[str] = None) -> dict:
+    """
+    Generate ranked, actionable recommendations from soil values.
+    Returns structured action plan.
+    """
+    applied = []
+    for rule in FERTILIZER_RULES:
+        try:
+            if rule["condition"](soil):
+                dose = rule["dose"](soil) if callable(rule["dose"]) else rule["dose"]
+                rationale = rule["rationale"](soil) if callable(rule["rationale"]) else rule["rationale"]
+                applied.append({
+                    "id": rule["id"],
+                    "priority": rule["priority"],
+                    "category": rule["category"],
+                    "action": rule["action"],
+                    "dose": dose,
+                    "timing": rule["timing"],
+                    "rationale": rationale,
+                    "benefit": rule["benefit"],
+                })
+        except Exception:
+            continue
+
+    # Sort by priority
+    applied.sort(key=lambda x: x["priority"])
+
+    # Group by category
+    grouped: dict[str, list] = {}
+    for rec in applied:
+        cat = rec["category"]
+        grouped.setdefault(cat, []).append(rec)
+
+    # Build phased action plan
+    phases = _build_phases(applied, crop)
+
+    # Overall summary
+    deficiencies = _identify_deficiencies(soil)
+    strengths = _identify_strengths(soil)
+
+    return {
+        "recommendations": applied,
+        "grouped": grouped,
+        "phases": phases,
+        "deficiencies": deficiencies,
+        "strengths": strengths,
+        "count": len(applied),
+    }
+
+
+def _build_phases(recs: list, crop: Optional[str]) -> list[dict]:
+    phases = [
+        {
+            "phase": 1,
+            "name": "Pre-Sowing (4-6 weeks before)",
+            "actions": [r["action"] for r in recs if r["priority"] == 1 and "Pre-sow" in r.get("timing", "")
+                        or r["priority"] == 1 and "Soil Amendment" in r.get("category", "")]
+        },
+        {
+            "phase": 2,
+            "name": "Sowing / Basal Application",
+            "actions": [r["action"] for r in recs if "basal" in r.get("timing", "").lower()
+                        or "sowing" in r.get("timing", "").lower()]
+        },
+        {
+            "phase": 3,
+            "name": "Top Dressing (30-45 DAS)",
+            "actions": [r["action"] for r in recs if "top dressing" in r.get("timing", "").lower()
+                        or "split" in r.get("timing", "").lower()]
+        },
+        {
+            "phase": 4,
+            "name": "Foliar / Crop Stage Application",
+            "actions": [r["action"] for r in recs if "foliar" in r.get("timing", "").lower()]
+        },
+    ]
+    # Remove empty phases
+    phases = [p for p in phases if p["actions"]]
+    # Deduplicate
+    for p in phases:
+        p["actions"] = list(dict.fromkeys(p["actions"]))
+    return phases
+
+
+def _identify_deficiencies(soil: dict) -> list[dict]:
+    deficiencies = []
+    for param, (lo_opt, hi_opt) in OPTIMAL_RANGES.items():
+        val = soil.get(param)
+        if val is None:
+            continue
+        score = _score_parameter(param, val)
+        if score < 60:
+            severity = "Critical" if score < 30 else "Moderate" if score < 50 else "Mild"
+            deficiencies.append({
+                "nutrient": param,
+                "value": val,
+                "optimal_range": f"{lo_opt}-{hi_opt}",
+                "severity": severity,
+                "score": round(score, 1),
+            })
+    deficiencies.sort(key=lambda x: x["score"])
+    return deficiencies
+
+
+def _identify_strengths(soil: dict) -> list[dict]:
+    strengths = []
+    for param, (lo_opt, hi_opt) in OPTIMAL_RANGES.items():
+        val = soil.get(param)
+        if val is None:
+            continue
+        score = _score_parameter(param, val)
+        if score >= 80:
+            strengths.append({
+                "nutrient": param,
+                "value": val,
+                "status": "Optimal" if score >= 90 else "Good",
+                "score": round(score, 1),
+            })
+    strengths.sort(key=lambda x: -x["score"])
+    return strengths

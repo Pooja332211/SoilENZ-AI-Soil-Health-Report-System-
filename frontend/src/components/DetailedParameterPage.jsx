@@ -1,254 +1,286 @@
 import React from "react";
-import SoilHealthIntelligencePage from "./SoilHealthIntelligencePage";
+
+function ParameterRow({
+  index,
+  parameter,
+  value,
+  unit,
+  status,
+  ideal,
+  interpretation,
+}) {
+
+  const statusColor =
+    status === "High"
+      ? "text-green-700"
+      : status === "Medium"
+      ? "text-yellow-600"
+      : status === "Low"
+      ? "text-red-500"
+      : "text-blue-600";
+
+  return (
+
+    <div className="grid grid-cols-[35px_150px_60px_65px_80px_80px_1fr] items-center border-b py-1 text-[10px]">
+
+      <div className="font-bold text-gray-500">
+        {index}
+      </div>
+
+      <div className="font-bold text-[#0f172a]">
+        {parameter}
+      </div>
+
+      <div className={`font-bold ${statusColor}`}>
+        {value || "-"}
+      </div>
+
+      <div>
+        {unit}
+      </div>
+
+      <div className={`font-bold ${statusColor}`}>
+        {status}
+      </div>
+
+      <div>
+        {ideal}
+      </div>
+
+      <div className="text-blue-700 leading-4">
+        {interpretation}
+      </div>
+
+    </div>
+  );
+}
+
+function getStatus(value, low, high) {
+
+  const val = parseFloat(value || 0);
+
+  if (val < low)
+    return "Low";
+
+  if (val > high)
+    return "High";
+
+  return "Medium";
+}
 
 function DetailedParameterPage({ report }) {
 
   if (!report) return null;
 
+const data =
+  report?.data || {};
+
   const rows = [
 
-    {
-      no: 1,
-      parameter: "pH (0-14)",
-      value: report.ph || "7.88",
-      unit: "pH",
-      status: "Alkaline",
-      range: "6.0 - 7.5",
-      interpretation:
-        "Alkaline soil, may limit nutrient availability",
-    },
+  {
+    parameter: "pH (0-14)",
+    value: data.ph,
+    unit: "pH",
+    ideal: "6.0 - 7.5",
+    interpretation: "Alkaline soil, may impact nutrient availability",
+    status: parseFloat(data.ph) > 7.5 ? "Alkaline" : "Normal",
+  },
 
-    {
-      no: 2,
-      parameter: "Electrical Conductivity (EC)",
-      value: report.ec || "0.716",
-      unit: "dS/m",
-      status: "Normal",
-      range: "< 4.0",
-      interpretation:
-        "Good, no salinity stress",
-    },
+  {
+    parameter: "Electrical Conductivity (EC)",
+    value: data.ec,
+    unit: "dS/m",
+    ideal: "< 4.0",
+    interpretation: "Good, no salinity stress",
+    status: "Normal",
+  },
 
-    {
-      no: 3,
-      parameter: "Organic Carbon (OC)",
-      value: report.organic_carbon || "0.53",
-      unit: "%",
-      status: "Medium",
-      range: "> 0.75",
-      interpretation:
-        "Medium organic matter",
-    },
+  {
+    parameter: "Organic Carbon (OC)",
+    value: data.organic_carbon,
+    unit: "%",
+    ideal: "> 0.75",
+    interpretation: "Medium organic matter",
+    status: getStatus(data.organic_carbon, 0.5, 0.75),
+  },
 
-    {
-      no: 4,
-      parameter: "Nitrogen (N)",
-      value: report.nitrogen || "163.46",
-      unit: "kg/ha",
-      status: "Low",
-      range: "> 280",
-      interpretation:
-        "Deficient, apply urea in split doses",
-    },
+  {
+    parameter: "Nitrogen (N)",
+    value: data.nitrogen,
+    unit: "kg/ha",
+    ideal: "> 280",
+    interpretation: "Deficient, apply urea split doses",
+    status: getStatus(data.nitrogen, 280, 500),
+  },
 
-    {
-      no: 5,
-      parameter: "Phosphorus (P)",
-      value: report.phosphorus || "43.76",
-      unit: "kg/ha",
-      status: "Medium",
-      range: "> 22",
-      interpretation:
-        "Marginal, apply basal P",
-    },
+  {
+    parameter: "Phosphorus (P)",
+    value: data.phosphorus,
+    unit: "kg/ha",
+    ideal: "> 22",
+    interpretation: "Medium supply level",
+    status: getStatus(data.phosphorus, 22, 50),
+  },
 
-    {
-      no: 6,
-      parameter: "Potassium (K)",
-      value: report.potassium || "670.52",
-      unit: "kg/ha",
-      status: "High",
-      range: "> 280",
-      interpretation:
-        "High, no need for potash fertilizer",
-    },
+  {
+    parameter: "Potassium (K)",
+    value: data.potassium,
+    unit: "kg/ha",
+    ideal: "> 280",
+    interpretation: "High, no need for potash fertilizer",
+    status: getStatus(data.potassium, 120, 280),
+  },
 
-    {
-      no: 7,
-      parameter: "Calcium (Ca)",
-      value: "54.08",
-      unit: "meq/100g",
-      status: "Sufficient",
-      range: "> 2.0",
-      interpretation:
-        "Sufficient for crop",
-    },
+  {
+    parameter: "Calcium (Ca)",
+    value: data.calcium,
+    unit: "meq/100g",
+    ideal: "> 2.0",
+    interpretation: "Sufficient for crop",
+    status: "Sufficient",
+  },
 
-    {
-      no: 8,
-      parameter: "Magnesium (Mg)",
-      value: "2.559",
-      unit: "meq/100g",
-      status: "Sufficient",
-      range: "> 1.0",
-      interpretation:
-        "Sufficient Mg",
-    },
+  {
+    parameter: "Magnesium (Mg)",
+    value: data.magnesium,
+    unit: "meq/100g",
+    ideal: "> 1.0",
+    interpretation: "Sufficient Mg",
+    status: "Sufficient",
+  },
 
-    {
-      no: 9,
-      parameter: "Sulfur (S)",
-      value: report.sulfur || "33.755",
-      unit: "ppm",
-      status: "Low",
-      range: "> 10",
-      interpretation:
-        "Deficient, apply sulfur",
-    },
+  {
+    parameter: "Sulfur (S)",
+    value: data.sulfur,
+    unit: "ppm",
+    ideal: "> 10",
+    interpretation: "Deficient, apply sulfur",
+    status: getStatus(data.sulfur, 10, 40),
+  },
 
-    {
-      no: 10,
-      parameter: "Iron (Fe)",
-      value: "6.770",
-      unit: "ppm",
-      status: "Adequate",
-      range: "> 4.5",
-      interpretation:
-        "Adequate, no need for iron",
-    },
+  {
+    parameter: "Iron (Fe)",
+    value: data.iron,
+    unit: "ppm",
+    ideal: "> 4.5",
+    interpretation: "Adequate, no need for iron",
+    status: "Adequate",
+  },
 
-    {
-      no: 11,
-      parameter: "Manganese (Mn)",
-      value: "1.991",
-      unit: "ppm",
-      status: "Low",
-      range: "> 2.0",
-      interpretation:
-        "Deficient, apply MnSO₄",
-    },
+  {
+    parameter: "Manganese (Mn)",
+    value: data.manganese,
+    unit: "ppm",
+    ideal: "> 2.0",
+    interpretation: "Deficient, apply MnSO₄",
+    status: getStatus(data.manganese, 2.0, 10),
+  },
 
-    {
-      no: 12,
-      parameter: "Copper (Cu)",
-      value: "1.182",
-      unit: "ppm",
-      status: "High",
-      range: "> 0.6",
-      interpretation:
-        "High, no need for copper",
-    },
+  {
+    parameter: "Copper (Cu)",
+    value: data.copper,
+    unit: "ppm",
+    ideal: "> 0.6",
+    interpretation: "High, no need for copper",
+    status: getStatus(data.copper, 0.6, 2),
+  },
 
-    {
-      no: 13,
-      parameter: "Zinc (Zn)",
-      value: "4.676",
-      unit: "ppm",
-      status: "High",
-      range: "> 0.2",
-      interpretation:
-        "High, no need for zinc",
-    },
+  {
+    parameter: "Zinc (Zn)",
+    value: data.zinc,
+    unit: "ppm",
+    ideal: "> 0.2",
+    interpretation: "High, no need for zinc",
+    status: getStatus(data.zinc, 0.2, 4),
+  },
 
-    {
-      no: 14,
-      parameter: "Boron (B)",
-      value: "0.974",
-      unit: "ppm",
-      status: "Medium",
-      range: "> 0.5",
-      interpretation:
-        "Marginal, may affect growth",
-    },
-  ];
+  {
+    parameter: "Boron (B)",
+    value: data.boron,
+    unit: "ppm",
+    ideal: "> 0.5",
+    interpretation: "Marginal, may affect growth",
+    status: getStatus(data.boron, 0.5, 1.5),
+  },
 
-  const getColor = (status) => {
-
-    if (status === "Low")
-      return "text-red-600";
-
-    if (status === "High")
-      return "text-green-700";
-
-    if (status === "Medium")
-      return "text-orange-500";
-
-    if (status === "Normal")
-      return "text-green-600";
-
-    if (status === "Sufficient")
-      return "text-green-700";
-
-    return "text-blue-700";
-  };
+];
 
   return (
 
-    <div className="report-page bg-white">
+    <div className="w-[210mm] -h-[297mm] bg-[#f4f6f8] mx-auto p-[10mm]">
 
-      {/* HEADER */}
+      {/* TOP */}
 
-      <div className="flex justify-between items-start mb-8">
+      <div className="flex justify-between items-start">
+
+        {/* LEFT */}
 
         <div>
 
-          <h1 className="text-6xl font-black leading-tight">
+          <h1 className="text-[36px] leading-[42px] font-black text-[#0f172a]">
 
-            ARKASHINE SOILENZ RESULTS –
+            ARKASHINE SOILENZ
+            RESULTS –
             <br />
-            DETAILED 14 PARAMETER TEST
+            DETAILED 14 PARAMETER
+            TEST
+
           </h1>
 
-          <div className="mt-4">
+          <div className="mt-5">
 
-            <h2 className="text-5xl font-black text-[#14532d]">
+            <h2 className="text-[#14532d] text-2xl font-black">
 
               SoilENZ
+
             </h2>
 
-            <p className="text-blue-700 font-semibold mt-2">
+            <p className="text-blue-600 font-semibold">
 
               Advanced Soil Intelligence
               <br />
               from Arkashine Labs
+
             </p>
 
           </div>
 
         </div>
 
-        {/* RIGHT BOX */}
+        {/* RIGHT */}
 
-        <div className="bg-[#14532d] text-white rounded-3xl p-6 w-[340px]">
+        <div className="bg-[#14532d] text-white rounded-[24px] p-7 w-[260px]">
 
-          <h2 className="text-2xl font-black mb-5">
+          <h2 className="text-xl font-black">
 
-            SOILENZ MEANS PRECISION
+            SOILENZ MEANS
+            PRECISION
+
           </h2>
 
-          <ul className="space-y-3 text-sm">
+          <div className="mt-5 space-y-3 text-[15px] leading-7">
 
-            <li>
-              ✅ Scientific 14 parameter soil test
-            </li>
+            <p>
+              ✓ Scientific 14 parameter soil test
+            </p>
 
-            <li>
-              ✅ Lab grade accuracy in your field
-            </li>
+            <p>
+              ✓ Lab grade accuracy in your field
+            </p>
 
-            <li>
-              ✅ Helps in smart recommendation
-            </li>
+            <p>
+              ✓ Helps in smart recommendation
+            </p>
 
-            <li>
-              ✅ Enables data-driven farming
-            </li>
+            <p>
+              ✓ Enables data-driven farming
+            </p>
 
-            <li>
-              ✅ Improves soil health
-            </li>
+            <p>
+              ✓ Improves soil health
+            </p>
 
-          </ul>
+          </div>
 
         </div>
 
@@ -256,121 +288,72 @@ function DetailedParameterPage({ report }) {
 
       {/* DATE */}
 
-      <div className="text-right text-blue-700 font-bold mb-5">
+      <div className="flex justify-end mt-5">
 
-        Analysis Date : 19 May 2026
+        <div className="text-blue-700 font-black text-lg">
+
+          Analysis Date : {data.report_date || "N/A"}
+          Analysis Time : {data.report_time || "N/A"}
+        </div>
 
       </div>
 
       {/* TABLE */}
 
-      <table className="w-full border-collapse">
+      <div className="bg-white rounded-[24px] border shadow-sm mt-5 overflow-hidden">
 
-        <thead>
+        {/* HEADER */}
 
-          <tr className="bg-[#14532d] text-white">
+<div className="grid grid-cols-[35px_150px_60px_65px_80px_80px_1fr] bg-[#14532d] text-white px-3 py-2 font-black text-[10px]">
+          <div>#</div>
+          <div>Parameter</div>
+          <div>Value</div>
+          <div>Unit</div>
+          <div>Status</div>
+          <div>Ideal Range</div>
+          <div>Interpretation</div>
 
-            <th className="p-3">#</th>
+        </div>
 
-            <th className="p-3 text-left">
+        {/* BODY */}
 
-              Parameter
-            </th>
+        <div className="px-5">
 
-            <th className="p-3">
+          {rows.map((item, index) => (
 
-              Value
-            </th>
-
-            <th className="p-3">
-
-              Unit
-            </th>
-
-            <th className="p-3">
-
-              Status
-            </th>
-
-            <th className="p-3">
-
-              Ideal Range
-            </th>
-
-            <th className="p-3 text-left">
-
-              Interpretation
-            </th>
-
-          </tr>
-
-        </thead>
-
-        <tbody>
-
-          {rows.map((row, index) => (
-
-            <tr
+            <ParameterRow
               key={index}
-              className="border-b hover:bg-green-50"
-            >
-
-              <td className="p-3 text-center font-bold text-blue-700">
-
-                {row.no}
-
-              </td>
-
-              <td className="p-3 text-blue-700 font-semibold">
-
-                {row.parameter}
-
-              </td>
-
-              <td className={`p-3 font-black text-center ${getColor(row.status)}`}>
-
-                {row.value}
-
-              </td>
-
-              <td className="p-3 text-center">
-
-                {row.unit}
-
-              </td>
-
-              <td className={`p-3 text-center font-bold ${getColor(row.status)}`}>
-
-                {row.status}
-
-              </td>
-
-              <td className="p-3 text-center">
-
-                {row.range}
-
-              </td>
-
-              <td className="p-3 text-blue-700">
-
-                {row.interpretation}
-
-              </td>
-
-            </tr>
+              index={index + 1}
+              parameter={item.parameter}
+              value={item.value}
+              unit={item.unit}
+              status={item.status}
+              ideal={item.ideal}
+              interpretation={item.interpretation}
+            />
 
           ))}
 
-        </tbody>
+        </div>
 
-      </table>
+      </div>
 
       {/* FOOTER */}
 
-      <div className="mt-6 text-blue-700 font-semibold text-sm">
+      <div className="mt-8 flex justify-between items-center">
 
-        Analysis Method:
-        Spectroscopy + AI Interpretation
+        <div className="text-blue-700 font-black text-lg">
+
+          Analysis Method:
+          Spectroscopy + AI Interpretation
+
+        </div>
+
+        <div className="text-gray-500 font-semibold">
+
+          SoilENZ Enterprise Intelligence Engine
+
+        </div>
 
       </div>
 

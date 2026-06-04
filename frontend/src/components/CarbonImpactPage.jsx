@@ -2,69 +2,77 @@ import React from "react";
 
 function CarbonImpactPage({ report }) {
 
-  if (!report) return null;
+  const carbon =
+  report?.carbon_data || {};
+
+const data =
+  report?.data || {};
 
   return (
 
-    <div className="report-page bg-white">
-
+<div className="w-[210mm] h-[297mm] bg-[#f4f6f8] mx-auto p-[8mm] overflow-hidden">
       {/* HEADER */}
 
-      <div className="mb-8">
+      <div className="flex justify-between items-start">
 
-        <div className="text-sm font-bold text-white bg-[#14532d] px-4 py-2 rounded-lg inline-block mb-4">
+        {/* LEFT */}
 
-          ARKASHINE INNOVATIONS | SoilENZ Advisory Report
+        <div>
+
+          <div className="bg-[#14532d] text-white inline-block px-4 py-1 rounded-full text-[10px] font-black">
+
+            ARKASHINE INNOVATIONS | SoilENZ Advisory Report
+
+          </div>
+
+          <h1 className="text-[34px] leading-[40px] font-black text-[#0f172a] mt-4">
+
+            CARBON CREDIT
+            <br />
+            IMPACT DASHBOARD
+
+          </h1>
+
+          <p className="text-blue-600 text-[12px] mt-2 font-semibold">
+
+            Your soil health contributes to
+            environmental sustainability and
+            carbon intelligence.
+
+          </p>
 
         </div>
 
-        <h1 className="text-[50px] font-black leading-[60px]">
-
-          CARBON CREDIT
-          <br />
-          IMPACT DASHBOARD
-
-        </h1>
-
-        <p className="text-blue-700 text-lg mt-3">
-
-          Your soil health action leads to
-          environment and income generation.
-
-        </p>
-
       </div>
 
-      {/* TOP FLOW */}
+      {/* TOP CARDS */}
 
-      <div className="grid grid-cols-5 gap-5 mb-10">
+      <div className="grid grid-cols-5 gap-3 mt-6">
 
         {[
-          "Sustainable Practices",
-          "Improved Soil Health",
-          "Higher Yield",
-          "CO₂ Sequestration",
-          "Carbon Credit",
-        ].map((item, index) => (
+          ["🌿", "Sustainable Practices"],
+          ["🌱", "Improved Soil Health"],
+          ["🌾", "Higher Yield"],
+          ["☁️", "CO₂ Sequestration"],
+          ["♻️", "Carbon Credit"],
+        ].map((item, i) => (
 
           <div
-            key={index}
-            className="border-2 rounded-3xl p-5 text-center"
+            key={i}
+            className="bg-white border rounded-[18px] p-4 text-center shadow-sm"
           >
 
-            <div className="text-6xl mb-4">
+            <div className="text-[38px]">
 
-              {
-                ["🧪", "🌱", "🌾", "☁️", "♻️"][index]
-              }
+              {item[0]}
 
             </div>
 
-            <h3 className="font-black text-lg">
+            <h2 className="text-[12px] font-black text-[#0f172a] mt-2 leading-5">
 
-              {item}
+              {item[1]}
 
-            </h3>
+            </h2>
 
           </div>
 
@@ -72,162 +80,116 @@ function CarbonImpactPage({ report }) {
 
       </div>
 
-      {/* MAIN GRID */}
+      {/* MIDDLE */}
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-2 gap-4 mt-5">
 
         {/* TABLE */}
 
-        <div className="border-2 rounded-3xl p-6">
+        <div className="bg-white border rounded-[18px] p-5 shadow-sm">
 
-          <h2 className="text-3xl font-black mb-6">
+          <h2 className="text-[22px] font-black text-[#0f172a]">
 
             ESTIMATED CARBON
             SEQUESTRATION
 
           </h2>
 
-          <table className="w-full">
+          <div className="mt-5 border rounded-xl overflow-hidden">
 
-            <thead>
+            <div className="grid grid-cols-4 bg-[#14532d] text-white text-[10px] font-black px-3 py-3">
 
-              <tr className="bg-[#14532d] text-white">
+              <div>Parameter</div>
+              <div>Current</div>
+              <div>Improved</div>
+              <div>Annual CO₂</div>
 
-                <th className="p-3">
+            </div>
 
-                  Parameter
-                </th>
+            {[
+              [
+  "Organic Carbon",
+  carbon.current_oc || 0,
+  carbon.improved_oc || 0,
+  carbon.annual_oc_gain || 0,
+],
+              [
+  "Biomass",
+  carbon.biomass_current || 0,
+  carbon.biomass_improved || 0,
+  carbon.biomass_gain || 0,
+],
+            ].map((row, idx) => (
 
-                <th className="p-3">
+              <div
+                key={idx}
+                className="grid grid-cols-4 px-3 py-3 text-[11px] border-b"
+              >
 
-                  Current
-                </th>
+                <div className="font-bold text-[#14532d]">
 
-                <th className="p-3">
+                  {row[0]}
 
-                  Improved
-                </th>
+                </div>
 
-                <th className="p-3">
+                <div>{row[1]}</div>
 
-                  Annual CO₂
-                </th>
+                <div>{row[2]}</div>
 
-              </tr>
+                <div className="font-black text-green-700">
 
-            </thead>
+                  {row[3]}
 
-            <tbody>
+                </div>
 
-              <tr className="border-b">
+              </div>
 
-                <td className="p-4 font-semibold text-blue-700">
+            ))}
 
-                  Organic Carbon
+            <div className="grid grid-cols-4 px-3 py-3 text-[11px] font-black">
 
-                </td>
+              <div>TOTAL</div>
+              <div></div>
+              <div></div>
+              <div className="text-green-700">
 
-                <td className="p-4 text-center">
+                {carbon.co2_sequestered_kg || 0} kg CO₂
 
-                  {report.organic_carbon || "0.53"}
+              </div>
 
-                </td>
+            </div>
 
-                <td className="p-4 text-center">
-
-                  0.73
-
-                </td>
-
-                <td className="p-4 text-center font-black text-green-700">
-
-                  180 kg
-
-                </td>
-
-              </tr>
-
-              <tr className="border-b">
-
-                <td className="p-4 font-semibold text-blue-700">
-
-                  Biomass
-
-                </td>
-
-                <td className="p-4 text-center">
-
-                  1.4
-
-                </td>
-
-                <td className="p-4 text-center">
-
-                  2.3
-
-                </td>
-
-                <td className="p-4 text-center font-black text-green-700">
-
-                  260 kg
-
-                </td>
-
-              </tr>
-
-              <tr>
-
-                <td className="p-4 font-black text-xl">
-
-                  TOTAL
-
-                </td>
-
-                <td />
-
-                <td />
-
-                <td className="p-4 text-center font-black text-3xl text-[#14532d]">
-
-                  440 kg CO₂
-
-                </td>
-
-              </tr>
-
-            </tbody>
-
-          </table>
+          </div>
 
         </div>
 
-        {/* SCORE */}
+        {/* RIGHT */}
 
-        <div className="space-y-8">
+        <div className="flex flex-col gap-4">
 
-          {/* BIG NUMBER */}
+          {/* CO2 SAVED */}
 
-          <div className="border-2 rounded-3xl p-10 text-center">
+          <div className="bg-white border rounded-[18px] p-5 shadow-sm text-center">
 
-            <h2 className="text-4xl font-black mb-6">
+            <h2 className="text-[24px] font-black text-[#0f172a]">
 
               CO₂ SAVED
 
             </h2>
 
-            <h1 className="text-[70px] font-black text-[#14532d] leading-none">
+            <div className="text-[54px] font-black text-[#14532d] mt-4">
 
-              440
+              {carbon.co2_sequestered_kg || 0}
 
-            </h1>
+            </div>
 
-            <p className="text-4xl font-black mt-4">
+            <p className="text-[14px] text-gray-500">
 
               kg CO₂
 
             </p>
 
-            <p className="text-blue-700 font-bold mt-4">
+            <p className="text-blue-600 text-[11px] font-bold mt-3">
 
               Per Acre / Year
 
@@ -235,33 +197,30 @@ function CarbonImpactPage({ report }) {
 
           </div>
 
-          {/* GAUGE */}
+          {/* SCORE */}
 
-          <div className="border-2 rounded-3xl p-8 text-center">
+          <div className="bg-white border rounded-[18px] p-5 shadow-sm text-center">
 
-            <h2 className="text-3xl font-black mb-6">
+            <h2 className="text-[22px] font-black text-[#0f172a]">
 
               CARBON HEALTH SCORE
 
             </h2>
 
-            <div className="relative w-72 h-36 mx-auto">
+            <div className="w-[220px] h-[110px] border-[16px] border-green-600 border-b-0 rounded-t-full mx-auto mt-6 flex items-end justify-center">
 
-              <div className="w-full h-full border-t-[28px] border-l-[28px] border-r-[28px] rounded-t-full border-green-600"></div>
+              <div className="mb-2">
 
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+                <div className="text-[42px] font-black text-[#0f172a]">
 
-                <h1 className="text-8xl font-black">
+                 {carbon.carbon_score || 0}
+                </div>
 
-                  {report.carbon_score || 56}
+                <div className="text-orange-500 font-black text-[12px]">
 
-                </h1>
+                 {carbon.carbon_status || "Low"}
 
-                <p className="text-orange-500 font-black text-4xl">
-
-                  MODERATE
-
-                </p>
+                </div>
 
               </div>
 
@@ -272,84 +231,122 @@ function CarbonImpactPage({ report }) {
         </div>
 
       </div>
+<div className="bg-white border rounded-[18px] p-5 shadow-sm">
 
-      {/* INSIGHTS */}
+  <h2 className="text-[20px] font-black">
 
-      <div className="grid grid-cols-2 gap-8 mt-10">
+    CARBON CREDIT POTENTIAL
+
+  </h2>
+
+  <div className="mt-4 text-[12px] leading-7">
+
+    <p>
+
+      Credits:
+
+      {" "}
+      {carbon.estimated_carbon_credits_low}
+      {" - "}
+      {carbon.estimated_carbon_credits_high}
+
+    </p>
+
+    <p>
+
+      Income:
+
+      {" "}
+      ₹{carbon.estimated_income_low}
+      {" - "}
+      ₹{carbon.estimated_income_high}
+
+    </p>
+
+  </div>
+
+</div>
+      {/* BOTTOM */}
+
+      <div className="grid grid-cols-2 gap-4 mt-5">
 
         {/* BENEFITS */}
 
-        <div className="border-2 rounded-3xl p-6">
+        <div className="bg-white border rounded-[18px] p-5 shadow-sm">
 
-          <h2 className="text-3xl font-black mb-5">
+          <h2 className="text-[20px] font-black text-[#0f172a]">
 
             KEY BENEFITS & INSIGHTS
 
           </h2>
 
-          <ul className="space-y-4 text-lg leading-8">
+          <div className="mt-4 text-[12px] text-gray-700 leading-7">
 
-            <li>
-              ✔ Additional carbon income possible
-            </li>
+            <p>
+              ✓ Additional carbon income possible
+            </p>
 
-            <li>
-              ✔ Improved soil structure
-            </li>
+            <p>
+              ✓ Improved soil structure
+            </p>
 
-            <li>
-              ✔ Better water holding capacity
-            </li>
+            <p>
+              ✓ Better water holding capacity
+            </p>
 
-            <li>
-              ✔ Sustainable climate smart farming
-            </li>
+            <p>
+              ✓ Sustainable climate-smart farming
+            </p>
 
-            <li>
-              ✔ Long term productivity improvement
-            </li>
+            <p>
+              ✓ Long-term productivity improvement
+            </p>
 
-          </ul>
+          </div>
 
         </div>
 
-        {/* SUMMARY */}
+        {/* CONDITIONS */}
 
-        <div className="border-2 rounded-3xl p-6">
+        <div className="bg-white border rounded-[18px] p-5 shadow-sm">
 
-          <h2 className="text-3xl font-black mb-5">
+          <h2 className="text-[20px] font-black text-[#0f172a]">
 
             SOIL CONDITIONS
 
           </h2>
 
-          <ul className="space-y-4 text-lg leading-8">
+          <div className="mt-4 text-[12px] text-gray-700 leading-7">
 
-            <li>
-              • Organic Carbon :
-              {report.organic_carbon || "0.53"}
-            </li>
+            <p>
+              • Organic Carbon:
+              {" "}
+              {data?.organic_carbon || 0}
+            </p>
 
-            <li>
-              • Nitrogen :
-              {report.nitrogen || "163"}
-            </li>
+            <p>
+              • Nitrogen:
+              {" "}
+              {data?.nitrogen || 0}
+            </p>
 
-            <li>
-              • pH :
-              {report.ph || "7.8"}
-            </li>
+            <p>
+              • pH:
+              {" "}
+              {data?.ph || 0}
+            </p>
 
-            <li>
-              • EC :
-              {report.ec || "0.71"}
-            </li>
+            <p>
+              • EC:
+              {" "}
+              {data?.ec || 0}
+            </p>
 
-            <li>
+            <p>
               • Precision nutrient management advised
-            </li>
+            </p>
 
-          </ul>
+          </div>
 
         </div>
 
@@ -357,17 +354,22 @@ function CarbonImpactPage({ report }) {
 
       {/* FOOTER */}
 
-      <div className="mt-6 flex justify-between text-blue-700 font-semibold text-sm">
+      <div className="flex justify-between mt-6 text-[10px] text-blue-700 font-bold">
 
-        <span>
+        <div>
+
           Note:
-          Carbon sequestration varies by climate and crop.
-        </span>
+          Carbon sequestration varies
+          by climate and crop.
 
-        <span>
+        </div>
+
+        <div>
+
           Analysis Method:
           Spectroscopy + AI Interpretation
-        </span>
+
+        </div>
 
       </div>
 

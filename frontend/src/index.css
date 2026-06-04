@@ -2,68 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
-/* =========================================
+/* ====================================
 GLOBAL
-========================================= */
+==================================== */
 
-* {
+html,
+body,
+#root {
+
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
 
-body {
+  width: 100%;
+  min-height: 297mm;;
 
   background: #eef2ef;
 
-  font-family: Inter, sans-serif;
-
-  color: #111827;
+  font-family:
+    Inter,
+    system-ui,
+    sans-serif;
 
   overflow-x: hidden;
 
-  zoom: 0.85;
+  scroll-behavior: smooth;
 }
 
-/* =========================================
-ROOT
-========================================= */
+/* ====================================
+PDF PAGE
+==================================== */
 
-#root {
-  min-height: 100vh;
+.pdf-page {
+
+  width: 210mm;
+
+  height: 297mm;
+
+  background: white;
+
+  margin: 0 auto;
+
+  overflow: hidden;
+
+  position: relative;
+
+  page-break-after: always;
+
+  page-break-inside: avoid;
 }
 
-/* =========================================
-SCROLLBAR
-========================================= */
-
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: #edf2ef;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #14532d;
-  border-radius: 20px;
-}
-
-/* =========================================
-BUTTON
-========================================= */
-
-button {
-
-  transition: all 0.3s ease;
-
-  cursor: pointer;
-}
-
-/* =========================================
+/* ====================================
 IMAGES
-========================================= */
+==================================== */
 
 img {
 
@@ -72,175 +62,54 @@ img {
   display: block;
 }
 
-/* =========================================
-TABLE
-========================================= */
+/* ====================================
+BUTTONS
+==================================== */
 
-table {
+button {
 
-  width: 100%;
+  border: none;
 
-  border-collapse: collapse;
+  outline: none;
+
+  cursor: pointer;
 }
 
-/* =========================================
-REPORT PAGE
-========================================= */
+/* ====================================
+SCROLLBAR
+==================================== */
 
-.report-page {
+::-webkit-scrollbar {
 
-  width: 210mm;
+  width: 10px;
+}
 
-  min-height: 297mm;
+::-webkit-scrollbar-thumb {
 
-  margin: 0 auto;
-
-  background: white;
-
-  padding: 12mm;
+  background: #14532d;
 
   border-radius: 20px;
-
-  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-
-  overflow: hidden;
-
-  position: relative;
 }
 
-/* =========================================
-FONT SIZE CONTROL
-========================================= */
+::-webkit-scrollbar-track {
 
-.report-page h1 {
-
-  font-size: 32px !important;
-
-  line-height: 38px !important;
+  background: #dfe7df;
 }
 
-.report-page h2 {
-
-  font-size: 22px !important;
-}
-
-.report-page h3 {
-
-  font-size: 16px !important;
-}
-
-.report-page p,
-.report-page span,
-.report-page li,
-.report-page td,
-.report-page th {
-
-  font-size: 12px !important;
-
-  line-height: 18px !important;
-}
-
-/* =========================================
-TABLE STYLING
-========================================= */
-
-table th {
-
-  padding: 10px;
-
-  font-size: 12px !important;
-}
-
-table td {
-
-  padding: 8px;
-
-  font-size: 11px !important;
-}
-
-/* =========================================
-CARDS
-========================================= */
-
-.card-hover {
-
-  transition: all 0.3s ease;
-}
-
-.card-hover:hover {
-
-  transform: translateY(-4px);
-
-  box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-}
-
-/* =========================================
-ANIMATION
-========================================= */
-
-.fade-in {
-
-  animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-
-  from {
-
-    opacity: 0;
-
-    transform: translateY(10px);
-  }
-
-  to {
-
-    opacity: 1;
-
-    transform: translateY(0);
-  }
-}
-
-/* =========================================
-PAGE BREAK
-========================================= */
-
-.page-break {
-
-  page-break-after: always;
-
-  break-after: page;
-
-  margin-bottom: 30px;
-}
-
-/* =========================================
-PDF / PRINT FIX
-========================================= */
+/* ====================================
+PRINT
+==================================== */
 
 @media print {
 
+  html,
   body {
-
-    background: white;
-
-    zoom: 1;
-  }
-
-  .report-page {
 
     width: 210mm;
 
-    min-height: 297mm;
+    height: 297mm;
 
-    padding: 10mm;
-
-    margin: 0;
-
-    border-radius: 0;
-
-    box-shadow: none;
-
-    overflow: hidden;
+    background: white;
   }
 
   button {
@@ -248,8 +117,28 @@ PDF / PRINT FIX
     display: none !important;
   }
 
-  .page-break {
+  .shadow-xl,
+  .shadow-2xl {
 
-    page-break-after: always;
+    box-shadow: none !important;
   }
+
+  .rounded-\[24px\],
+  .rounded-\[30px\] {
+
+    border-radius: 0 !important;
+  }
+}
+
+/* ====================================
+TEXT RENDERING
+==================================== */
+
+* {
+
+  box-sizing: border-box;
+
+  -webkit-font-smoothing: antialiased;
+
+  text-rendering: optimizeLegibility;
 }

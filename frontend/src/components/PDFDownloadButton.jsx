@@ -1,83 +1,112 @@
 import React from "react";
 
-import html2pdf from "html2pdf.js";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 function PDFDownloadButton() {
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
 
-    const element =
-      document.getElementById("report-content");
+    const report =
+      document.getElementById(
+        "report-content"
+      );
 
-    if (!element) {
+    if (!report) return;
 
-      alert("Report not found");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+      compress: true,
+    });
 
-      return;
+    const pages =
+      report.querySelectorAll(
+        ".pdf-page"
+      );
+
+    for (
+      let i = 0;
+      i < pages.length;
+      i++
+    ) {
+
+      const page =
+        pages[i];
+
+      const canvas =
+        await html2canvas(
+          page,
+          {
+            scale: 3,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor:
+              "#ffffff",
+            logging: false,
+            scrollX: 0,
+            scrollY: 0,
+          }
+        );
+
+      const imgData =
+        canvas.toDataURL(
+          "image/jpeg",
+          1.0
+        );
+
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+
+      if (i !== 0) {
+
+        pdf.addPage();
+      }
+
+      pdf.addImage(
+        imgData,
+        "JPEG",
+        0,
+        0,
+        pdfWidth,
+        pdfHeight,
+        undefined,
+        "FAST"
+      );
     }
 
-    const options = {
-
-      margin: 0,
-
-      filename:
-        "SoilENZ_Premium_Report.pdf",
-
-      image: {
-        type: "jpeg",
-        quality: 1,
-      },
-
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        scrollY: 0,
-      },
-
-      jsPDF: {
-        unit: "mm",
-        format: "a4",
-        orientation: "portrait",
-      },
-
-      pagebreak: {
-        mode: ["avoid-all", "css", "legacy"],
-      },
-    };
-
-    html2pdf()
-      .set(options)
-      .from(element)
-      .save();
+    pdf.save(
+      "SoilENZ_AI_Report.pdf"
+    );
   };
 
   return (
 
-    <div className="flex justify-center my-8">
+    <button
 
-      <button
-        onClick={downloadPDF}
-        className="
-          bg-[#14532d]
-          hover:bg-[#0f3d22]
-          text-white
-          px-8
-          py-4
-          rounded-2xl
-          text-[16px]
-          font-bold
-          shadow-xl
-          transition-all
-          duration-300
-          hover:scale-105
-        "
-      >
+      onClick={downloadPDF}
 
-        Download Premium PDF Report
+      className="
+        bg-[#14532d]
+        hover:bg-[#166534]
+        transition-all
+        duration-300
+        text-white
+        px-8
+        py-3
+        rounded-xl
+        text-lg
+        font-bold
+        shadow-lg
+      "
 
-      </button>
+    >
 
-    </div>
+      Download AI Report PDF
+
+    </button>
+
   );
 }
 

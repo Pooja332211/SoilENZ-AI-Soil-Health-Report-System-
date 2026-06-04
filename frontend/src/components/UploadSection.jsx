@@ -1,154 +1,138 @@
 import React from "react";
 
 import {
-  Upload,
-  FileText,
-  Sparkles,
+  UploadCloud,
+  FileImage,
+  CheckCircle2,
 } from "lucide-react";
 
 function UploadSection({
-
   file,
   setFile,
-  generateReport,
-  loading,
-
 }) {
 
-  const handleFile = (e) => {
+  const handleFileChange =
+    (e) => {
 
-    const selected = e.target.files[0];
+      const selected =
+        e.target.files[0];
 
-    if (selected) {
+      if (selected) {
 
-      setFile(selected);
-    }
-  };
+        console.log(
+          "SELECTED FILE:",
+          selected
+        );
+
+        setFile(selected);
+      }
+    };
 
   return (
 
-    <div className="bg-white rounded-3xl shadow-2xl p-10">
+    <div>
 
-      {/* HEADER */}
+      {/* UPLOAD BOX */}
 
-      <div className="mb-10">
+      <label
+        htmlFor="file-upload"
+        className="w-full border-2 border-dashed border-[#14532d] bg-[#f7faf8] rounded-[30px] p-14 flex flex-col items-center justify-center cursor-pointer hover:bg-[#eef7f0] transition-all duration-300"
+      >
 
-        <h1 className="text-5xl font-black text-[#14532d]">
+        {/* ICON */}
 
-          Upload Soil Test Receipt
+        <div className="w-24 h-24 rounded-full bg-[#14532d] text-white flex items-center justify-center shadow-lg">
 
-        </h1>
+          <UploadCloud size={46} />
 
-        <p className="text-xl text-gray-500 mt-4">
+        </div>
 
-          Upload JPG / PNG / PDF soil laboratory reports
+        {/* TEXT */}
+
+        <h2 className="text-[34px] font-black text-[#0f172a] mt-8">
+
+          Upload Soil Test Report
+
+        </h2>
+
+        <p className="text-gray-500 text-lg mt-4 text-center max-w-2xl leading-8">
+
+          Upload soil laboratory report image
+          or PDF for OCR extraction, AI soil
+          analysis, crop suitability prediction,
+          carbon impact insights, and PDF report
+          generation.
 
         </p>
 
-      </div>
+        {/* BUTTON */}
 
-      {/* CONTENT */}
+        <div className="mt-8 bg-[#14532d] text-white px-8 py-4 rounded-[18px] font-black text-lg shadow-lg">
 
-      <div className="grid grid-cols-2 gap-10 items-center">
+          Choose File
 
-        {/* LEFT */}
+        </div>
 
-        <div className="border-4 border-dashed border-green-600 rounded-3xl p-10 bg-[#f5f7f5]">
+        {/* INPUT */}
 
-          <label className="cursor-pointer">
+        <input
+          id="file-upload"
+          type="file"
+          accept="image/*,.pdf"
+          className="hidden"
+          onChange={handleFileChange}
+        />
 
-            <input
-              type="file"
-              className="hidden"
-              accept=".jpg,.jpeg,.png,.pdf"
-              onChange={handleFile}
-            />
+      </label>
 
-            <div className="flex flex-col items-center justify-center text-center">
+      {/* FILE INFO */}
 
-              <div className="bg-[#14532d] text-white p-6 rounded-full">
+      {file && (
 
-                <Upload size={50} />
+        <div className="mt-8 bg-white border rounded-[24px] p-6 shadow-sm flex items-center justify-between">
 
-              </div>
+          {/* LEFT */}
 
-              <h2 className="text-3xl font-black text-[#14532d] mt-6">
+          <div className="flex items-center gap-5">
 
-                Choose File
+            <div className="w-16 h-16 rounded-2xl bg-green-100 text-green-700 flex items-center justify-center">
+
+              <FileImage size={34} />
+
+            </div>
+
+            <div>
+
+              <h2 className="text-xl font-black text-[#0f172a]">
+
+                {file.name}
 
               </h2>
 
-              <p className="text-lg text-gray-500 mt-3">
+              <p className="text-gray-500 mt-2">
 
-                JPG / PNG / PDF
+                {(file.size / 1024 / 1024).toFixed(2)}
+                MB Uploaded
+
               </p>
 
             </div>
 
-          </label>
+          </div>
 
-          {/* FILE */}
+          {/* STATUS */}
 
-          {file && (
+          <div className="flex items-center gap-3 text-green-700 font-black text-lg">
 
-            <div className="mt-8 bg-white rounded-2xl p-6 shadow-sm">
+            <CheckCircle2 size={28} />
 
-              <div className="flex items-center gap-4">
+            Ready
 
-                <FileText
-                  size={40}
-                  className="text-[#14532d]"
-                />
-
-                <div>
-
-                  <p className="text-lg text-gray-500">
-
-                    Uploaded File
-
-                  </p>
-
-                  <h3 className="text-xl font-bold text-[#14532d] break-all">
-
-                    {file.name}
-
-                  </h3>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          )}
+          </div>
 
         </div>
 
-        {/* RIGHT */}
-
-        <div className="flex flex-col items-center justify-center">
-
-          <button
-
-            onClick={generateReport}
-
-            disabled={loading}
-
-            className="bg-[#14532d] hover:bg-[#166534] text-white px-14 py-6 rounded-3xl text-3xl font-black shadow-xl flex items-center gap-4 disabled:opacity-50"
-
-          >
-
-            <Sparkles size={34} />
-
-            {loading
-              ? "Generating..."
-              : "Generate AI Report"}
-
-          </button>
-
-        </div>
-
-      </div>
+      )}
 
     </div>
   );

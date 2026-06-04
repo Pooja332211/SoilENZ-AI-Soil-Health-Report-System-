@@ -1,22 +1,12 @@
 import React, { useState } from "react";
 
 import UploadSection from "./components/UploadSection";
-
-import ReportContainer from "./components/ReportContainer";
-
 import LoadingScreen from "./components/LoadingScreen";
+import ReportContainer from "./components/ReportContainer";
 
 import { generateSoilReport } from "./services/api";
 
-import {
-  Leaf,
-  ShieldCheck,
-  Database,
-  BrainCircuit,
-} from "lucide-react";
-
 function App() {
-
   const [file, setFile] = useState(null);
 
   const [report, setReport] = useState(null);
@@ -25,33 +15,34 @@ function App() {
 
   const [error, setError] = useState("");
 
-  // =========================================
+  // =====================================
   // GENERATE REPORT
-  // =========================================
+  // =====================================
 
   const handleGenerateReport = async () => {
-
     if (!file) {
-
       alert("Please upload soil report image");
-
       return;
     }
 
     try {
-
       setLoading(true);
 
       setError("");
 
-      const formData = new FormData();
-
-      formData.append("file", file);
-
       const response =
-        await generateSoilReport(formData);
+        await generateSoilReport(file);
+
+      console.log(
+        "========== BACKEND RESPONSE =========="
+      );
 
       console.log(response);
+
+      console.log(
+        "REPORT.DATA =>",
+        response?.data
+      );
 
       setReport(response);
 
@@ -60,217 +51,118 @@ function App() {
       console.error(err);
 
       setError(
-        "AI Report generation failed"
+        "Failed to generate AI report"
       );
 
     } finally {
 
       setLoading(false);
+
     }
   };
 
   return (
-
     <div className="min-h-screen bg-[#eef2ef]">
 
-      {/* ======================================
-         HEADER
-      ====================================== */}
+      {/* HEADER */}
 
-      <div className="bg-[#062e16] text-white px-10 py-5 shadow-xl">
+      <div className="bg-[#14532d] text-white shadow-xl">
+        <div className="max-w-[1700px] mx-auto px-10 py-8 flex justify-between items-center">
 
-        <div className="max-w-[1700px] mx-auto flex justify-between items-center">
+          <div>
+            <h1 className="text-[52px] font-black leading-[56px]">
+              SoilENZ AI Platform
+            </h1>
 
-          {/* LEFT */}
-
-          <div className="flex items-center gap-5">
-
-            <div className="bg-white/10 p-4 rounded-2xl">
-
-              <Leaf size={42} />
-
-            </div>
-
-            <div>
-
-              <h1 className="text-5xl font-black">
-
-                SoilENZ AI Platform
-
-              </h1>
-
-              <p className="text-green-200 mt-1 text-lg">
-
-                Advanced Soil Intelligence &
-                Carbon Credit Analytics
-
-              </p>
-
-            </div>
-
+            <p className="text-green-100 text-[18px] mt-3">
+              AI Soil Intelligence,
+              Carbon Analytics &
+              Precision Farming
+            </p>
           </div>
 
-          {/* RIGHT */}
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-5 rounded-[22px]">
+            <h2 className="text-[24px] font-black">
+              Enterprise Edition
+            </h2>
 
-          <div className="flex gap-4">
-
-            <div className="bg-white/10 px-5 py-3 rounded-2xl flex items-center gap-3">
-
-              <ShieldCheck size={22} />
-
-              <span className="font-bold">
-
-                AI Verified
-
-              </span>
-
-            </div>
-
-            <div className="bg-white/10 px-5 py-3 rounded-2xl flex items-center gap-3">
-
-              <Database size={22} />
-
-              <span className="font-bold">
-
-                OCR Extraction
-
-              </span>
-
-            </div>
-
-            <div className="bg-white/10 px-5 py-3 rounded-2xl flex items-center gap-3">
-
-              <BrainCircuit size={22} />
-
-              <span className="font-bold">
-
-                Smart Analytics
-
-              </span>
-
-            </div>
-
+            <p className="text-green-100 text-[14px] mt-2">
+              OCR + AI + PDF Engine
+            </p>
           </div>
 
         </div>
-
       </div>
 
-      {/* ======================================
-         HERO SECTION
-      ====================================== */}
+      {/* BODY */}
 
       <div className="max-w-[1700px] mx-auto px-8 py-10">
 
-        <div className="bg-white rounded-[40px] shadow-xl overflow-hidden border border-green-100">
+        <div className="bg-white border rounded-[30px] p-10 shadow-xl">
 
-          {/* TOP HERO */}
+          <div className="flex justify-between items-center flex-wrap gap-6">
 
-          <div className="bg-gradient-to-r from-[#14532d] to-green-700 text-white p-12">
+            <div>
+              <h2 className="text-[40px] font-black text-[#0f172a]">
+                Upload Soil Test Report
+              </h2>
 
-            <div className="max-w-5xl">
-
-              <h1 className="text-7xl font-black leading-tight">
-
-                AI Powered Soil Intelligence
-                & Carbon Credit Platform
-
-              </h1>
-
-              <p className="text-2xl text-green-100 mt-6 leading-10">
-
-                Upload soil laboratory reports to generate
-                enterprise-grade agricultural intelligence,
-                nutrient analytics, crop suitability,
-                carbon insights and premium PDF reports.
-
+              <p className="text-gray-500 text-[17px] mt-3 max-w-3xl leading-8">
+                Upload laboratory soil report image for OCR extraction,
+                AI nutrient analysis, crop intelligence,
+                sustainability scoring and premium PDF generation.
               </p>
-
             </div>
+
+            <button
+              onClick={handleGenerateReport}
+              disabled={loading}
+              className="bg-[#14532d] hover:bg-[#166534] transition-all duration-300 text-white px-10 py-5 rounded-[22px] text-[22px] font-black shadow-lg"
+            >
+              {loading
+                ? "Generating..."
+                : "Generate AI Report"}
+            </button>
 
           </div>
 
-          {/* CONTENT */}
-
-          <div className="p-10">
-
-            {/* UPLOAD */}
-
+          <div className="mt-10">
             <UploadSection
               file={file}
               setFile={setFile}
             />
-
-            {/* BUTTON */}
-
-            <div className="mt-10 flex justify-center">
-
-              <button
-
-                onClick={handleGenerateReport}
-
-                disabled={loading}
-
-                className="bg-[#14532d] hover:bg-[#166534] disabled:opacity-50 text-white px-14 py-6 rounded-3xl text-3xl font-black shadow-xl transition-all duration-300"
-
-              >
-
-                {loading
-                  ? "Generating AI Report..."
-                  : "Generate Premium AI Report"}
-
-              </button>
-
-            </div>
-
-            {/* ERROR */}
-
-            {error && (
-
-              <div className="mt-8 bg-red-100 border border-red-300 text-red-700 rounded-2xl p-5 text-center font-bold">
-
-                {error}
-
-              </div>
-
-            )}
-
           </div>
+
+          {error && (
+            <div className="mt-8 bg-red-100 border border-red-300 text-red-700 p-5 rounded-2xl text-center font-bold">
+              {error}
+            </div>
+          )}
 
         </div>
 
-        {/* ======================================
-           LOADING SCREEN
-        ====================================== */}
-
         {loading && (
-
           <div className="mt-10">
-
             <LoadingScreen />
-
           </div>
-
         )}
 
-        {/* ======================================
-           REPORT
-        ====================================== */}
-
         {report && !loading && (
+          <div className="mt-12">
 
-          <div className="mt-10">
+            {console.log(
+              "REPORT STATE =>",
+              report
+            )}
 
             <ReportContainer
               report={report}
             />
 
           </div>
-
         )}
 
       </div>
-
     </div>
   );
 }

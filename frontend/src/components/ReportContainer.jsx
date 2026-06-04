@@ -1,17 +1,11 @@
 import React from "react";
 
 import SoilHealthIntelligencePage from "./SoilHealthIntelligencePage";
-
 import DetailedParameterPage from "./DetailedParameterPage";
-
 import GridAnalysisPage from "./GridAnalysisPage";
-
 import CropSuitability from "./CropSuitability";
-
 import ActionPlanPage from "./ActionPlanPage";
-
 import CarbonImpactPage from "./CarbonImpactPage";
-
 import PDFDownloadButton from "./PDFDownloadButton";
 
 function ReportContainer({ report }) {
@@ -20,22 +14,26 @@ function ReportContainer({ report }) {
 
   return (
 
-    <div className="pb-20">
+    <div className="w-full flex flex-col items-center bg-gray-100 py-8">
 
-      {/* SINGLE PDF BUTTON */}
+      {/* DOWNLOAD BUTTON */}
 
-      <PDFDownloadButton />
+      <div className="sticky top-4 z-50 mb-6">
 
-      {/* REPORT */}
+        <PDFDownloadButton />
+
+      </div>
+
+      {/* PDF CONTENT */}
 
       <div
         id="report-content"
-        className="space-y-8"
+        className="flex flex-col items-center gap-0"
       >
 
         {/* PAGE 1 */}
 
-        <div className="page-break">
+        <div className="pdf-page">
 
           <SoilHealthIntelligencePage
             report={report}
@@ -45,7 +43,7 @@ function ReportContainer({ report }) {
 
         {/* PAGE 2 */}
 
-        <div className="page-break">
+        <div className="pdf-page">
 
           <DetailedParameterPage
             report={report}
@@ -55,7 +53,7 @@ function ReportContainer({ report }) {
 
         {/* PAGE 3 */}
 
-        <div className="page-break">
+        <div className="pdf-page">
 
           <GridAnalysisPage
             report={report}
@@ -65,7 +63,7 @@ function ReportContainer({ report }) {
 
         {/* PAGE 4 */}
 
-        <div className="page-break">
+        <div className="pdf-page">
 
           <CropSuitability
             report={report}
@@ -75,7 +73,7 @@ function ReportContainer({ report }) {
 
         {/* PAGE 5 */}
 
-        <div className="page-break">
+        <div className="pdf-page">
 
           <ActionPlanPage
             report={report}
@@ -85,7 +83,7 @@ function ReportContainer({ report }) {
 
         {/* PAGE 6 */}
 
-        <div className="page-break">
+        <div className="pdf-page">
 
           <CarbonImpactPage
             report={report}
@@ -96,6 +94,7 @@ function ReportContainer({ report }) {
       </div>
 
     </div>
+
   );
 }
 

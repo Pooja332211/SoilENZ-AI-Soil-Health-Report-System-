@@ -1,64 +1,65 @@
 import React from "react";
 
-import {
-  LoaderCircle,
-  Leaf,
-  Database,
-  FileSearch,
-  BarChart3,
-} from "lucide-react";
-
-function LoadingScreen() {
-
-  const steps = [
-
-    {
-      icon: <FileSearch size={34} />,
-      title: "Analyzing Soil Receipt",
-    },
-
-    {
-      icon: <Database size={34} />,
-      title: "Extracting Nutrient Data",
-    },
-
-    {
-      icon: <Leaf size={34} />,
-      title: "Generating AI Insights",
-    },
-
-    {
-      icon: <BarChart3 size={34} />,
-      title: "Building Enterprise Report",
-    },
-  ];
+function LoadingCard({
+  title,
+  desc,
+  icon,
+}) {
 
   return (
 
-    <div className="bg-white rounded-3xl shadow-2xl p-14 mt-10">
+    <div className="bg-white border rounded-[18px] p-5 shadow-sm">
+
+      <div className="text-[40px]">
+
+        {icon}
+
+      </div>
+
+      <h2 className="text-[22px] font-black text-[#0f172a] mt-4">
+
+        {title}
+
+      </h2>
+
+      <p className="text-[12px] text-gray-500 leading-6 mt-3">
+
+        {desc}
+
+      </p>
+
+    </div>
+  );
+}
+
+function LoadingScreen() {
+
+  return (
+
+    <div className="bg-[#f4f6f8] border rounded-[28px] p-10 shadow-xl">
 
       {/* TOP */}
 
-      <div className="flex flex-col items-center justify-center">
+      <div className="text-center">
 
-        <div className="bg-[#14532d] p-8 rounded-full shadow-xl">
+        <div className="w-24 h-24 rounded-full bg-[#14532d] text-white flex items-center justify-center text-[42px] mx-auto animate-spin">
 
-          <LoaderCircle
-            size={90}
-            className="text-white animate-spin"
-          />
+          🧠
 
         </div>
 
-        <h1 className="text-5xl font-black text-[#14532d] mt-10">
+        <h1 className="text-[42px] font-black text-[#0f172a] mt-6">
 
-          Generating AI Soil Report
+          SoilENZ AI Processing
 
         </h1>
 
-        <p className="text-2xl text-gray-500 mt-4">
+        <p className="text-gray-500 text-[15px] mt-4 max-w-3xl mx-auto leading-8">
 
-          Please wait while SoilENZ AI processes your report
+          OCR extraction, nutrient analysis,
+          crop recommendation, carbon scoring,
+          sustainability intelligence and PDF
+          generation are in progress.
 
         </p>
 
@@ -66,58 +67,43 @@ function LoadingScreen() {
 
       {/* STEPS */}
 
-      <div className="grid grid-cols-2 gap-8 mt-16">
+      <div className="grid grid-cols-2 gap-5 mt-10">
 
-        {steps.map((item, index) => (
+        <LoadingCard
+          icon="📄"
+          title="OCR Extraction"
+          desc="Reading nutrient values and farmer details from uploaded report."
+        />
 
-          <div
-            key={index}
-            className="bg-[#f5f7f5] rounded-3xl p-8 border border-green-100 flex items-center gap-6 shadow-sm"
-          >
+        <LoadingCard
+          icon="📊"
+          title="AI Nutrient Analysis"
+          desc="Analyzing pH, EC, NPK and micronutrient balance."
+        />
 
-            <div className="bg-[#14532d] text-white p-5 rounded-2xl">
+        <LoadingCard
+          icon="🌾"
+          title="Crop Intelligence"
+          desc="Generating crop suitability and amendment strategy."
+        />
 
-              {item.icon}
-
-            </div>
-
-            <div>
-
-              <h2 className="text-2xl font-black text-[#14532d]">
-
-                {item.title}
-
-              </h2>
-
-              <p className="text-lg text-gray-500 mt-2">
-
-                AI Processing Active
-
-              </p>
-
-            </div>
-
-          </div>
-
-        ))}
+        <LoadingCard
+          icon="♻️"
+          title="Carbon Analytics"
+          desc="Computing sustainability and carbon impact metrics."
+        />
 
       </div>
 
-      {/* PROGRESS */}
+      {/* FOOTER */}
 
-      <div className="mt-16">
+      <div className="text-center mt-10">
 
-        <div className="w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+        <div className="inline-flex items-center gap-3 bg-[#14532d] text-white px-8 py-4 rounded-full text-[16px] font-black shadow-lg">
 
-          <div className="h-6 bg-gradient-to-r from-[#14532d] to-green-500 rounded-full animate-pulse w-[85%]"></div>
+          <div className="w-3 h-3 rounded-full bg-white animate-bounce"></div>
 
-        </div>
-
-        <div className="flex justify-between mt-4 text-lg text-gray-500">
-
-          <span>Initializing AI Engine</span>
-
-          <span>85% Completed</span>
+          Generating Premium AI Report
 
         </div>
 

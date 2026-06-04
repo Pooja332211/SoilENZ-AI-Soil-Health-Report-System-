@@ -1,377 +1,318 @@
-import SoilHealthIntelligencePage from "./SoilHealthIntelligencePage";
 import React from "react";
 
-function ActionPlanPage() {
+const defaultAmendments = 
+   [
+  {
+    name: "FYM / Compost",
+    dose: "1500 – 2000 kg",
+    purpose: "Improve organic matter & soil biology",
+    timing: "Pre sowing",
+    priority: "HIGH",
+    icon: "🪴",
+  },
+  {
+    name: "Vermicompost",
+    dose: "500 kg",
+    purpose: "Improve microbial activity",
+    timing: "Pre sowing",
+    priority: "HIGH",
+    icon: "🪱",
+  },
+  {
+    name: "Gypsum / Dolomite",
+    dose: "100 kg",
+    purpose: "Improve Mg sufficiency & balance",
+    timing: "Pre sowing",
+    priority: "HIGH",
+    icon: "⚪",
+  },
+  {
+    name: "Urea (46% N)",
+    dose: "55 kg",
+    purpose: "Nitrogen supply",
+    timing: "Split dose",
+    priority: "HIGH",
+    icon: "🧪",
+  },
+  {
+    name: "DAP (18-46-0)",
+    dose: "40 kg",
+    purpose: "Basal phosphorus supply",
+    timing: "Basal",
+    priority: "MEDIUM",
+    icon: "🧴",
+  },
+  {
+    name: "MOP (0-0-60)",
+    dose: "No need",
+    purpose: "Potassium already sufficient",
+    timing: "Basal",
+    priority: "LOW",
+    icon: "🟢",
+  },
+];
 
-  const amendments = [
+function ActionPlanPage({ report }) {
 
-    {
-      input: "FYM / Compost",
-      dose: "1500 – 2000 kg",
-      purpose:
-        "Improve organic matter & soil biology",
-      timing: "Pre sowing",
-      priority: "HIGH",
-      color: "text-red-600",
-      icon: "🪵",
-    },
+  const soil = report?.data || {};
 
-    {
-      input: "Vermicompost",
-      dose: "500 kg",
-      purpose:
-        "Improve microbial activity",
-      timing: "Pre sowing",
-      priority: "HIGH",
-      color: "text-red-600",
-      icon: "🪱",
-    },
+  const amendments =
+    Array.isArray(report?.action_plan) &&
+    report.action_plan.length > 0
+      ? report.action_plan
+      : defaultAmendments;
 
-    {
-      input: "Gypsum / Dolomite",
-      dose: "100 kg",
-      purpose:
-        "Improve Mg deficiency & balance",
-      timing: "Pre sowing",
-      priority: "HIGH",
-      color: "text-red-600",
-      icon: "⚪",
-    },
+  const corrections = [];
 
-    {
-      input: "Urea (46% N)",
-      dose: "55 kg",
-      purpose:
-        "Nitrogen supply",
-      timing: "Split dose",
-      priority: "HIGH",
-      color: "text-red-600",
-      icon: "🧪",
-    },
+if (Number(soil.nitrogen) < 280)
+  corrections.push(
+    "Low nitrogen → apply split urea doses"
+  );
 
-    {
-      input: "DAP (18-46-0)",
-      dose: "40 kg",
-      purpose:
-        "Basal phosphorus supply",
-      timing: "Basal",
-      priority: "MEDIUM",
-      color: "text-orange-500",
-      icon: "🧴",
-    },
+if (Number(soil.phosphorus) < 22)
+  corrections.push(
+    "Low phosphorus → apply basal DAP"
+  );
 
-    {
-      input: "MOP (0-0-60)",
-      dose: "No need",
-      purpose:
-        "Potassium already sufficient",
-      timing: "Basal",
-      priority: "LOW",
-      color: "text-black",
-      icon: "🟢",
-    },
+if (Number(soil.organic_carbon) < 0.75)
+  corrections.push(
+    "Improve organic matter → apply FYM"
+  );
 
-    {
-      input: "Magnesium Sulphate",
-      dose: "25 kg",
-      purpose:
-        "Correct Mg deficiency",
-      timing: "Basal",
-      priority: "HIGH",
-      color: "text-red-600",
-      icon: "🧂",
-    },
+if (Number(soil.sulfur) < 10)
+  corrections.push(
+    "Apply sulfur source"
+  );
 
-    {
-      input: "Ferrous Sulphate",
-      dose: "10 kg",
-      purpose:
-        "Correct iron deficiency",
-      timing: "Basal",
-      priority: "HIGH",
-      color: "text-red-600",
-      icon: "⚫",
-    },
+const low = [];
+const medium = [];
+const high = [];
 
-    {
-      input: "MnSO₄",
-      dose: "10 kg",
-      purpose:
-        "Improve Mn availability",
-      timing: "Basal",
-      priority: "HIGH",
-      color: "text-red-600",
-      icon: "🔵",
-    },
+if (Number(soil.nitrogen) < 280)
+  low.push("Nitrogen");
 
-    {
-      input: "Boron",
-      dose: "1 kg",
-      purpose:
-        "Correct boron deficiency",
-      timing: "Basal",
-      priority: "HIGH",
-      color: "text-red-600",
-      icon: "🟠",
-    },
-  ];
+if (Number(soil.manganese) < 2)
+  low.push("Manganese");
+
+if (Number(soil.boron) < 0.5)
+  low.push("Boron");
+
+if (Number(soil.organic_carbon) < 0.75)
+  medium.push("Organic Carbon");
+
+if (Number(soil.phosphorus) < 50)
+  medium.push("Phosphorus");
+
+if (Number(soil.potassium) > 280)
+  high.push("Potassium");
+
+if (Number(soil.zinc) > 2)
+  high.push("Zinc");
 
   return (
 
-    <div className="report-page bg-white">
-
+<div className="w-[210mm] h-[297mm] bg-[#f4f6f8] mx-auto p-[8mm] overflow-hidden">
       {/* HEADER */}
 
-      <div className="mb-8">
+      <div>
 
-        <h1 className="text-6xl font-black leading-tight">
+        <h1 className="text-[34px] font-black text-[#0f172a]">
 
-          SOIL AMENDMENT &
-          ACTION PLAN
+          SOIL AMENDMENT & ACTION PLAN
+
         </h1>
 
-        <p className="text-blue-700 mt-3 text-lg">
+        <p className="text-blue-600 text-[12px] mt-1 font-semibold">
 
-          Balanced soil nutrition is the key to
-          sustainable high yield and health.
+          Science-driven solutions to improve
+          nutrient balance and crop productivity
+
         </p>
 
       </div>
 
       {/* TABLE */}
 
-      <table className="w-full border-collapse">
+      <div className="bg-white border rounded-[18px] mt-5 overflow-hidden shadow-sm">
 
-        <thead>
+        {/* HEADER */}
 
-          <tr className="bg-[#14532d] text-white">
+        <div className="grid grid-cols-5 bg-[#14532d] text-white px-4 py-3 text-[11px] font-black">
 
-            <th className="p-4">
+          <div>Input / Amendment</div>
+          <div>Dose (Per Acre)</div>
+          <div>Purpose</div>
+          <div>Timing</div>
+          <div>Priority</div>
 
-              Input / Amendment
-            </th>
+        </div>
 
-            <th className="p-4">
+        {/* ROWS */}
 
-              Dose (Per Acre)
-            </th>
+        {amendments.map((item, index) => (
 
-            <th className="p-4">
+          <div
+            key={index}
+            className="grid grid-cols-5 items-center px-4 py-4 border-b text-[11px]"
+          >
 
-              Purpose
-            </th>
+            {/* NAME */}
 
-            <th className="p-4">
+            <div className="flex items-center gap-3 font-black text-[#14532d]">
 
-              Timing
-            </th>
+              <span className="text-[22px]">
 
-            <th className="p-4">
+                {item.icon}
 
-              Priority
-            </th>
+              </span>
 
-          </tr>
+              {item.name}
 
-        </thead>
+            </div>
 
-        <tbody>
+            {/* DOSE */}
 
-          {amendments.map((item, index) => (
+            <div className="font-bold">
 
-            <tr
-              key={index}
-              className="border-b hover:bg-green-50"
+              {item.dose}
+
+            </div>
+
+            {/* PURPOSE */}
+
+            <div className="text-blue-600">
+
+              {item.purpose}
+
+            </div>
+
+            {/* TIMING */}
+
+            <div>
+
+              {item.timing}
+
+            </div>
+
+            {/* PRIORITY */}
+
+            <div
+              className={`font-black ${
+                item.priority === "HIGH"
+                  ? "text-red-500"
+                  : item.priority === "MEDIUM"
+                  ? "text-orange-500"
+                  : "text-black"
+              }`}
             >
 
-              <td className="p-4">
+              • {item.priority}
 
-                <div className="flex items-center gap-4">
+            </div>
 
-                  <div className="text-3xl">
+          </div>
 
-                    {item.icon}
+        ))}
 
-                  </div>
-
-                  <span className="font-semibold text-blue-700">
-
-                    {item.input}
-
-                  </span>
-
-                </div>
-
-              </td>
-
-              <td className="p-4 text-center font-bold">
-
-                {item.dose}
-
-              </td>
-
-              <td className="p-4 text-blue-700">
-
-                {item.purpose}
-
-              </td>
-
-              <td className="p-4 text-center">
-
-                {item.timing}
-
-              </td>
-
-              <td className={`p-4 text-center font-black ${item.color}`}>
-
-                ● {item.priority}
-
-              </td>
-
-            </tr>
-
-          ))}
-
-        </tbody>
-
-      </table>
+      </div>
 
       {/* TIMELINE */}
 
-      <div className="mt-10 border rounded-3xl p-8">
+      <div className="bg-white border rounded-[18px] p-5 mt-5 shadow-sm">
 
-        <h2 className="text-4xl font-black mb-8">
+        <h2 className="text-[22px] font-black text-[#0f172a]">
 
           ACTION PLAN TIMELINE
+
         </h2>
 
-        <div className="grid grid-cols-4 gap-8 text-center">
+        <div className="grid grid-cols-4 gap-4 mt-6">
 
-          <div>
+          {[
+            {
+              icon: "🚜",
+              title: "Pre Sowing",
+              subtitle: "(0–7 Days)",
+              points: [
+                "Apply FYM / Compost",
+                "Apply Gypsum",
+                "Prepare field",
+                "Improve drainage",
+              ],
+            },
+            {
+              icon: "🌱",
+              title: "Basal Dose",
+              subtitle: "(At Sowing)",
+              points: [
+                "Apply DAP",
+                "Apply MgSO₄",
+                "Apply FeSO₄",
+                "Apply Boron",
+              ],
+            },
+            {
+              icon: "🌾",
+              title: "During Growth",
+              subtitle: "(20–45 DAS)",
+              points: [
+                "Split urea application",
+                "Monitor deficiency",
+                "Irrigation management",
+                "Weed control",
+              ],
+            },
+            {
+              icon: "📋",
+              title: "Pre Harvest",
+              subtitle: "(90–120 DAS)",
+              points: [
+                "Balanced irrigation",
+                "Avoid excess nitrogen",
+                "Harvest at maturity",
+              ],
+            },
+          ].map((step, i) => (
 
-            <div className="text-7xl mb-4">
+            <div
+              key={i}
+              className="text-center"
+            >
 
-              🚜
+              <div className="text-[50px]">
 
-            </div>
+                {step.icon}
 
-            <h3 className="font-black text-2xl">
+              </div>
 
-              Pre Sowing
-            </h3>
+              <h2 className="font-black text-[16px] mt-2">
 
-            <p className="text-blue-700 font-semibold">
+                {step.title}
 
-              (0 – 7 Days)
-            </p>
+              </h2>
 
-            <ul className="text-sm mt-4 space-y-2 text-left">
+              <p className="text-blue-600 text-[11px] font-bold">
 
-              <li>• Apply FYM / Compost</li>
+                {step.subtitle}
 
-              <li>• Apply Gypsum</li>
+              </p>
 
-              <li>• Prepare field</li>
+              <div className="text-left text-[11px] mt-4 text-gray-700 leading-6">
 
-              <li>• Improve drainage</li>
+                {step.points.map(
+                  (point, idx) => (
 
-            </ul>
+                    <p key={idx}>
+                      • {point}
+                    </p>
+                  )
+                )}
 
-          </div>
-
-          <div>
-
-            <div className="text-7xl mb-4">
-
-              🌱
-
-            </div>
-
-            <h3 className="font-black text-2xl">
-
-              Basal Dose
-            </h3>
-
-            <p className="text-blue-700 font-semibold">
-
-              (At Sowing)
-            </p>
-
-            <ul className="text-sm mt-4 space-y-2 text-left">
-
-              <li>• Apply DAP</li>
-
-              <li>• Apply MgSO₄</li>
-
-              <li>• Apply FeSO₄</li>
-
-              <li>• Apply Boron</li>
-
-            </ul>
-
-          </div>
-
-          <div>
-
-            <div className="text-7xl mb-4">
-
-              🌾
-
-            </div>
-
-            <h3 className="font-black text-2xl">
-
-              During Growth
-            </h3>
-
-            <p className="text-blue-700 font-semibold">
-
-              (20 – 45 DAS)
-            </p>
-
-            <ul className="text-sm mt-4 space-y-2 text-left">
-
-              <li>• Split urea application</li>
-
-              <li>• Monitor deficiency</li>
-
-              <li>• Irrigation management</li>
-
-              <li>• Weed control</li>
-
-            </ul>
-
-          </div>
-
-          <div>
-
-            <div className="text-7xl mb-4">
-
-              📋
+              </div>
 
             </div>
 
-            <h3 className="font-black text-2xl">
-
-              Pre Harvest
-            </h3>
-
-            <p className="text-blue-700 font-semibold">
-
-              (90 – 103 DAS)
-            </p>
-
-            <ul className="text-sm mt-4 space-y-2 text-left">
-
-              <li>• Balanced irrigation</li>
-
-              <li>• Avoid excess nitrogen</li>
-
-              <li>• Harvest at maturity</li>
-
-            </ul>
-
-          </div>
+          ))}
 
         </div>
 
@@ -379,85 +320,71 @@ function ActionPlanPage() {
 
       {/* BOTTOM */}
 
-      <div className="grid grid-cols-2 gap-6 mt-8">
+      <div className="grid grid-cols-2 gap-4 mt-5">
 
-        {/* LEFT */}
+        {/* CORRECTIONS */}
 
-        <div className="border rounded-3xl p-6">
+        <div className="bg-white border rounded-[18px] p-5 shadow-sm">
 
-          <h2 className="text-3xl font-black mb-5 text-blue-700">
+          <h2 className="text-[20px] font-black text-blue-700">
 
             IMPORTANT CORRECTIONS
+
           </h2>
 
-          <ul className="space-y-3 text-sm leading-7">
+          <div className="mt-4 text-[12px] text-gray-700 leading-7">
 
-            <li>
-              ✔ Low nitrogen → apply split urea doses
-            </li>
+  {corrections.map((item, index) => (
+    <p key={index}>
+      ✓ {item}
+    </p>
+  ))}
 
-            <li>
-              ✔ Medium phosphorus → apply basal DAP
-            </li>
+  <p>✓ Maintain proper drainage</p>
 
-            <li>
-              ✔ High potassium → avoid potash
-            </li>
-
-            <li>
-              ✔ Low sulfur → apply sulfur correction
-            </li>
-
-            <li>
-              ✔ Improve organic matter with compost
-            </li>
-
-          </ul>
+</div>
 
         </div>
 
-        {/* RIGHT */}
+        {/* SUMMARY */}
 
-        <div className="border rounded-3xl p-6">
+        <div className="bg-white border rounded-[18px] p-5 shadow-sm">
 
-          <h2 className="text-3xl font-black mb-5 text-blue-700">
+          <h2 className="text-[20px] font-black text-blue-700">
 
             KEY SOIL TEST SUMMARY
+
           </h2>
 
-          <ul className="space-y-3 text-sm leading-7">
+          <div className="mt-4 text-[12px] text-gray-700 leading-7">
 
-            <li>
-              🔴 Low:
-              Nitrogen, Sulfur, Mn
-            </li>
+            <p>
 
-            <li>
-              🟠 Medium:
-              Organic Carbon, P
-            </li>
+  🔴 Low: {low.join(", ") || "None"}
 
-            <li>
-              🟢 High:
-              Potassium, Zinc
-            </li>
+</p>
 
-            <li>
-              ✔ Sufficient:
-              Calcium, Magnesium
-            </li>
+<p>
 
-            <li>
-              📌 pH:
-              7.88 (Alkaline)
-            </li>
+  🟠 Medium: {medium.join(", ") || "None"}
 
-            <li>
-              📌 EC:
-              0.7162 dS/m (Normal)
-            </li>
+</p>
 
-          </ul>
+<p>
+
+  🟢 High: {high.join(", ") || "None"}
+
+</p>
+
+<p>
+
+  🔵 pH:
+  {Number(soil.ph) > 7.5
+    ? " Alkaline"
+    : " Normal"}
+
+</p>
+          </div>
 
         </div>
 

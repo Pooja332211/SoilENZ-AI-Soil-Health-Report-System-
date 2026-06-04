@@ -1,388 +1,267 @@
-import SoilHealthIntelligencePage from "./SoilHealthIntelligencePage";
 import React from "react";
 
-import {
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-} from "lucide-react";
+function CropSuitability({ report }) {
 
-function CropSuitability() {
+  const crops =
+  report?.crop_recommendations ||
+  report?.recommendations?.crops ||
+  [];
+console.log("CROPS", crops);
+  const topCrop =
+    crops.length > 0
+      ? crops[0].crop
+      : "No Recommendation";
 
-  const crops = [
+  const topRecommended = crops
+    .filter((c) => c.score >= 6)
+    .slice(0, 5)
+    .map((c) => c.crop)
+    .join(", ");
 
-    {
-      name: "Wheat",
-      score: 6.5,
-      status: "Recommended",
-      color: "bg-green-700",
-      note: "Balanced fertility required",
-      icon: "🌾",
-    },
+  const cropIcons = {
+    Wheat: "🌾",
+    Paddy: "🌾",
+    Sorghum: "🌽",
+    "Pearl Millet": "🌾",
+    Cotton: "☁️",
+    "Pigeon Pea": "🌱",
+    Groundnut: "🥜",
+    "Green Gram": "🫛",
+    Tomato: "🍅",
+    Brinjal: "🍆",
+    Cauliflower: "🥦",
+  };
 
-    {
-      name: "Paddy",
-      score: 8.5,
-      status: "Highly Recommended",
-      color: "bg-green-700",
-      note: "Best suited for alkaline pH",
-      icon: "🌾",
-    },
+  const getStatusIcon = (status) => {
+    if (status.includes("Highly")) return "✅";
+    if (status.includes("Recommended")) return "✔️";
+    if (status.includes("Moderately")) return "⚠️";
+    return "❌";
+  };
 
-    {
-      name: "Sorghum",
-      score: 8.0,
-      status: "Highly Recommended",
-      color: "bg-green-700",
-      note: "Tolerant to alkaline soil",
-      icon: "🌽",
-    },
-
-    {
-      name: "Pearl Millet",
-      score: 7.5,
-      status: "Recommended",
-      color: "bg-green-700",
-      note: "Drought tolerant",
-      icon: "🌾",
-    },
-
-    {
-      name: "Cotton",
-      score: 7.2,
-      status: "Recommended",
-      color: "bg-green-700",
-      note: "Performs well in high K",
-      icon: "🧶",
-    },
-
-    {
-      name: "Pigeon Pea",
-      score: 6.8,
-      status: "Recommended",
-      color: "bg-green-700",
-      note: "Good for fertility",
-      icon: "🌱",
-    },
-
-    {
-      name: "Groundnut",
-      score: 5.2,
-      status: "Moderately Suitable",
-      color: "bg-orange-500",
-      note: "Needs better organic matter",
-      icon: "🥜",
-    },
-
-    {
-      name: "Green Gram",
-      score: 4.8,
-      status: "Moderately Suitable",
-      color: "bg-orange-500",
-      note: "Sensitive to low Mn",
-      icon: "🫛",
-    },
-
-    {
-      name: "Tomato",
-      score: 2.5,
-      status: "Not Recommended",
-      color: "bg-red-600",
-      note: "Sensitive to high pH",
-      icon: "🍅",
-    },
-
-    {
-      name: "Brinjal",
-      score: 2.0,
-      status: "Not Recommended",
-      color: "bg-red-600",
-      note: "Needs rich nutrients",
-      icon: "🍆",
-    },
-
-    {
-      name: "Cauliflower",
-      score: 1.5,
-      status: "Not Recommended",
-      color: "bg-red-600",
-      note: "Requires high organic matter",
-      icon: "🥦",
-    },
-  ];
+  const analysisDate = new Date().toLocaleDateString();
 
   return (
 
-    <div className="report-page">
-
+<div className="w-[210mm] h-[297mm] bg-[#f4f6f8] mx-auto p-[8mm] overflow-hidden">
       {/* HEADER */}
 
-      <div className="mb-10">
+      <div className="flex justify-between items-start mb-4">
 
-        <h1 className="text-5xl font-black text-[#14532d]">
+        <div>
 
-          CROP SUITABILITY ANALYSIS
+          <h1 className="text-[24px] font-black text-[#0f172a]">
 
-        </h1>
+            CROP SUITABILITY ANALYSIS
 
-        <p className="text-blue-700 mt-3 text-lg">
+          </h1>
 
-          Crop suitability based on pH, EC, NPK,
-          Organic Carbon and climate intelligence
-        </p>
+          <p className="text-[10px] text-blue-700 font-semibold">
+
+            Crop suitability based on soil pH,
+            EC, N, P, K, OC and climate intelligence
+
+          </p>
+
+        </div>
+
+        <div className="text-right">
+
+          <div className="text-[22px] font-black text-green-800">
+
+            SoilENZ
+
+          </div>
+
+          <div className="text-[9px] text-blue-700 font-semibold">
+
+            Advanced Soil Intelligence
+
+          </div>
+
+        </div>
 
       </div>
 
-      {/* TOP STATS */}
+      {/* INFO CARDS */}
 
-      <div className="grid grid-cols-4 gap-5 mb-10">
+      <div className="grid grid-cols-4 gap-3 mb-4">
 
-        <div className="border rounded-2xl p-5 bg-white">
-
-          <h3 className="text-gray-500">
-
+        <div className="border rounded-xl p-3 bg-gray-50">
+          <div className="text-[9px] text-gray-500 font-bold">
             Field Area
-          </h3>
-
-          <h2 className="text-3xl font-black mt-2">
-
-            -
-          </h2>
-
+          </div>
+          <div className="text-[16px] font-black mt-1">
+            1 Acre
+          </div>
         </div>
 
-        <div className="border rounded-2xl p-5 bg-white">
-
-          <h3 className="text-gray-500">
-
+        <div className="border rounded-xl p-3 bg-gray-50">
+          <div className="text-[9px] text-gray-500 font-bold">
             Grid Size
-          </h3>
-
-          <h2 className="text-3xl font-black mt-2">
-
-            30m × 30m
-          </h2>
-
+          </div>
+          <div className="text-[16px] font-black mt-1">
+            30m x 30m
+          </div>
         </div>
 
-        <div className="border rounded-2xl p-5 bg-white">
-
-          <h3 className="text-gray-500">
-
+        <div className="border rounded-xl p-3 bg-gray-50">
+          <div className="text-[9px] text-gray-500 font-bold">
             Total Grids
-          </h3>
-
-          <h2 className="text-3xl font-black mt-2">
-
+          </div>
+          <div className="text-[16px] font-black mt-1">
             16
-          </h2>
-
+          </div>
         </div>
 
-        <div className="border rounded-2xl p-5 bg-white">
-
-          <h3 className="text-gray-500">
-
+        <div className="border rounded-xl p-3 bg-gray-50">
+          <div className="text-[9px] text-gray-500 font-bold">
             Analysis Date
-          </h3>
-
-          <h2 className="text-3xl font-black mt-2">
-
-            19 May 2026
-          </h2>
-
+          </div>
+          <div className="text-[16px] font-black mt-1">
+            {analysisDate}
+          </div>
         </div>
 
       </div>
 
       {/* TABLE */}
 
-      <div className="overflow-x-auto">
+      <div className="border rounded-xl overflow-hidden">
 
-        <table className="w-full">
+        <div className="grid grid-cols-[180px_1fr_60px_150px_200px] bg-gray-100 text-[10px] font-black p-2">
 
-          <thead>
+          <div>Crop</div>
+          <div>Suitability Score</div>
+          <div>Score</div>
+          <div>Status</div>
+          <div>Key Notes</div>
 
-            <tr className="border-b">
+        </div>
 
-              <th className="p-4 text-left">
+        {crops.map((crop, index) => {
 
-                Crop
-              </th>
+          const color =
+            crop.score >= 8
+              ? "bg-green-700"
+              : crop.score >= 6
+              ? "bg-green-500"
+              : crop.score >= 4
+              ? "bg-orange-500"
+              : "bg-red-600";
 
-              <th className="p-4 text-left">
+          return (
 
-                Suitability
-              </th>
+            <div
+              key={index}
+              className="grid grid-cols-[180px_1fr_60px_150px_200px] items-center border-b px-2 py-2"
+            >
 
-              <th className="p-4 text-left">
+              <div className="flex items-center gap-2">
 
-                Score
-              </th>
+                <span className="text-lg">
+                  {cropIcons[crop.crop] || "🌱"}
+                </span>
 
-              <th className="p-4 text-left">
+                <span className="text-[11px] font-semibold">
+                  {crop.crop}
+                </span>
 
-                Status
-              </th>
+              </div>
 
-              <th className="p-4 text-left">
+              <div className="pr-3">
 
-                Key Notes
-              </th>
+                <div className="w-full bg-gray-200 h-3 rounded-full">
 
-            </tr>
+                  <div
+                    className={`${color} h-3 rounded-full`}
+                    style={{
+                      width: `${crop.score * 10}%`,
+                    }}
+                  />
 
-          </thead>
+                </div>
 
-          <tbody>
+              </div>
 
-            {crops.map((crop, index) => (
+              <div className="font-black text-[12px]">
+                {crop.score}
+              </div>
 
-              <tr
-                key={index}
-                className="border-b hover:bg-green-50"
-              >
+              <div className="text-[10px] font-semibold flex items-center gap-1">
 
-                {/* CROP */}
+                <span>
+                  {getStatusIcon(crop.status)}
+                </span>
 
-                <td className="p-4">
+                <span>
+                  {crop.status}
+                </span>
 
-                  <div className="flex items-center gap-4">
+              </div>
 
-                    <div className="text-4xl">
+              <div className="text-[10px] text-gray-600">
+                {crop.note}
+              </div>
 
-                      {crop.icon}
+            </div>
 
-                    </div>
+          );
 
-                    <div>
-
-                      <h3 className="font-black text-[#14532d]">
-
-                        {crop.name}
-
-                      </h3>
-
-                    </div>
-
-                  </div>
-
-                </td>
-
-                {/* BAR */}
-
-                <td className="p-4 w-[300px]">
-
-                  <div className="w-full bg-gray-200 rounded-full h-5">
-
-                    <div
-                      className={`${crop.color} h-5 rounded-full`}
-                      style={{
-                        width: `${crop.score * 10}%`,
-                      }}
-                    ></div>
-
-                  </div>
-
-                </td>
-
-                {/* SCORE */}
-
-                <td className="p-4">
-
-                  <h2 className="text-3xl font-black">
-
-                    {crop.score}
-
-                  </h2>
-
-                </td>
-
-                {/* STATUS */}
-
-                <td className="p-4">
-
-                  <div className="flex items-center gap-3">
-
-                    {crop.status ===
-                      "Highly Recommended" && (
-
-                      <CheckCircle className="text-green-600" />
-
-                    )}
-
-                    {crop.status ===
-                      "Recommended" && (
-
-                      <CheckCircle className="text-green-600" />
-
-                    )}
-
-                    {crop.status ===
-                      "Moderately Suitable" && (
-
-                      <AlertTriangle className="text-orange-500" />
-
-                    )}
-
-                    {crop.status ===
-                      "Not Recommended" && (
-
-                      <XCircle className="text-red-600" />
-
-                    )}
-
-                    <span className="font-bold">
-
-                      {crop.status}
-
-                    </span>
-
-                  </div>
-
-                </td>
-
-                {/* NOTES */}
-
-                <td className="p-4 text-gray-700">
-
-                  {crop.note}
-
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
+        })}
 
       </div>
 
-      {/* FOOTER */}
+      {/* BOTTOM CARDS */}
 
-      <div className="mt-10 bg-[#f5f7f5] border rounded-3xl p-8">
+      <div className="grid grid-cols-2 gap-3 mt-4">
 
-        <h2 className="text-3xl font-black text-[#14532d] mb-4">
+        <div className="border rounded-xl p-4 bg-gray-50">
 
-          AI Crop Intelligence Summary
-        </h2>
+          <div className="text-[14px] font-black text-[#14532d]">
 
-        <p className="text-gray-700 leading-8">
+            TOP RECOMMENDED CROPS
 
-          Paddy, Sorghum and Wheat show the highest
-          suitability scores based on alkaline soil
-          condition, potassium richness and balanced
-          phosphorus availability. Vegetable crops such
-          as Tomato and Cauliflower are less suitable
-          due to elevated pH and micronutrient imbalance.
+          </div>
 
-        </p>
+          <div className="text-[11px] mt-2 text-blue-700 font-semibold">
+
+            {topRecommended}
+
+          </div>
+
+          <div className="text-[10px] mt-3 text-gray-600">
+
+            Focus on balanced irrigation,
+            nutrient management and organic
+            matter improvement for maximum yield.
+
+          </div>
+
+        </div>
+
+        <div className="border rounded-xl p-4 bg-gray-50">
+
+          <div className="text-[14px] font-black text-[#14532d]">
+
+            AI CROP SUMMARY
+
+          </div>
+
+          <div className="text-[10px] mt-2 text-gray-600">
+
+            {topCrop} is currently the most suitable
+            crop based on soil fertility,
+            nutrient balance and pH conditions.
+
+          </div>
+
+        </div>
 
       </div>
 
     </div>
+
   );
 }
 
